@@ -1,0 +1,148 @@
+✅ Day 1: Environment Setup & Architecture Overview (Beginner-Friendly)
+🧠 By the end of Day 1, you’ll have your dev environment ready and understand the basics of Angular and ASP.NET Core MVC architecture.
+
+🔹 Part 1: Install Required Software
+1️⃣ Install Node.js & NPM
+🔧 Node is required for Angular. NPM comes with it.
+
+📥 Download & Install:
+👉 https://nodejs.org/en/download/
+Choose the LTS (Long-Term Support) version
+
+✅ After installation:
+node -v
+npm -v
+You should see version numbers like v18.x.x and 8.x.x.
+
+📘 What is Node.js?
+Node.js lets Angular manage packages (libraries) and build/serve the app using command-line tools.
+
+2️⃣ Install Angular CLI
+The Angular CLI is the command-line tool to create and manage Angular projects.
+
+📦 Run this in terminal (Command Prompt or PowerShell):
+npm install -g @angular/cli
+
+✅ Check version:
+ng version
+
+📘 What is Angular CLI?
+It helps scaffold Angular apps, components, services, etc.
+Like ng new, ng serve, ng generate component, etc.
+
+3️⃣ Install .NET SDK
+Required to create ASP.NET Core applications.
+
+📥 Download:
+👉 https://dotnet.microsoft.com/en-us/download
+
+Choose .NET 8 SDK (Recommended)
+
+✅ Check:
+dotnet --version
+
+📘 What is .NET SDK?
+It contains all the tools and runtime to create and run ASP.NET Core applications (MVC/Web APIs).
+
+4️⃣ Install IDEs
+Choose based on your project type:
+
+IDE	Purpose	Link
+Visual Studio Code	For Angular apps	https://code.visualstudio.com
+Visual Studio 2022+ (Community Edition)	For ASP.NET Core	https://visualstudio.microsoft.com/
+➡️ In Visual Studio, install the ASP.NET and web development workload during setup.
+
+🔹 Part 2: Create First Angular App
+▶️ Step-by-step:
+
+Open terminal:
+ng new my-angular-app
+
+Choose:
+Yes for routing
+
+CSS for styling (or SCSS if familiar)
+
+Move into the project folder:
+cd my-angular-app
+ng serve
+
+Open browser:
+🔗 http://localhost:4200
+
+🔍 Learn Angular Structure:
+File/Folder	Purpose
+main.ts	Entry point of app
+app.module.ts	Registers components & modules
+app.component.ts/html	Root component with HTML view
+angular.json	Config & build settings
+
+📘 Beginner Article:
+🔗 Angular Getting Started
+🔗 Tour of Heroes (Full Guide)
+
+🔹 Part 3: Create First ASP.NET Core MVC App
+
+▶️ Steps (Using Visual Studio):
+Open Visual Studio → Create New Project
+Choose: ASP.NET Core Web App (Model-View-Controller)
+Name it: MyAspNetMvcApp
+Framework: .NET 8
+
+Click Create
+
+▶️ Run the app
+Click Run (F5 or Ctrl+F5)
+
+It opens in browser → default landing page
+
+🔍 Understand MVC Structure:
+Folder	Purpose
+Controllers/	C# classes handling requests
+Views/	Razor HTML files (.cshtml)
+Models/	Classes representing your data
+Program.cs	App startup logic
+📘 Beginner Resources:
+
+🔗 Microsoft Learn - Intro to ASP.NET Core MVC
+
+📺 YouTube: ASP.NET Core MVC Crash Course
+
+🔹 Part 4: Architecture Overview
+✅ Angular (Frontend SPA Framework)
+📘 Core Concepts:
+
+Components = UI blocks
+
+Modules = Group of components
+
+Services = Shared logic (API calls)
+
+Routing = Navigation between views
+
+🎨 Angular is a Single Page Application framework. It renders dynamic content without reloading the whole page.
+
+
+🔗 Angular Architecture Explained
+
+✅ ASP.NET Core MVC (Backend Web Framework)
+📘 Core Concepts:
+
+Model = Represents your data
+
+View = HTML with Razor syntax
+
+Controller = Handles user request
+
+📘 It's a server-side framework that generates HTML dynamically and returns it to browser.
+
+🔗 ASP.NET Core MVC Explained
+
+🔚 Day 1 Summary
+Task	Completed
+Node.js + Angular CLI installed	✅
+.NET SDK installed	✅
+IDEs installed	✅
+First Angular app created	✅
+First ASP.NET Core MVC app created	✅
+Understood both architectures	✅
