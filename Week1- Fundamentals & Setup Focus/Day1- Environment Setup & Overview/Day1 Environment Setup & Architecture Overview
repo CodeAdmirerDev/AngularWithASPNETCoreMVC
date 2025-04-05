@@ -1,7 +1,7 @@
 ✅ Day 1: Environment Setup & Architecture Overview (Beginner-Friendly)
 🧠 By the end of Day 1, you’ll have your dev environment ready and understand the basics of Angular and ASP.NET Core MVC architecture.
 
-🔹 Part 1: Install Required Software
+# 🔹 Part 1: Install Required Software
 1️⃣ Install Node.js & NPM
 🔧 Node is required for Angular. NPM comes with it.
 
