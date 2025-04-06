@@ -12,7 +12,7 @@ Choose the LTS (Long-Term Support) version
 ✅ After installation:
 node -v
 npm -v
-You should see version numbers like v18.x.x and 8.x.x.
+You should see version numbers like v22.x.x and 10.x.x.
 
 📘 What is Node.js?
 Node.js lets Angular manage packages (libraries) and build/serve the app using command-line tools.
@@ -56,12 +56,32 @@ Visual Studio 2022+ (Community Edition)	For ASP.NET Core	https://visualstudio.mi
 ▶️ Step-by-step:
 
 Open terminal:
-ng new my-angular-app
+ng new demo-angular-app
 
 Choose:
 Yes for routing
 
 CSS for styling (or SCSS if familiar)
+
+N for Do you want to enable Server-Side Rendering (SSR) and Static Site Generation (SSG/Prerendering)? (y/N)
+
+      🤔 What Does It Mean?
+      SSR (Server-Side Rendering): Angular renders the app on the server before sending it to the client. Improves SEO & load time.
+      
+      SSG (Static Site Generation): Pre-renders some or all of your app pages at build time.
+      
+      ✅ What Should You Choose (as a Beginner)?
+      📌 Answer: N (or just press Enter)
+      
+      💡 Reason: For now, you're learning Angular basics with ASP.NET Core as backend. SSR/SSG is an advanced topic mainly useful for SEO-focused sites like blogs, portfolios, etc.
+      
+      🧠 When to use SSR/SSG?
+      Use it later when:      
+      You build content-heavy sites (e.g., e-commerce, blogs)
+      You care about SEO for public pages
+      You want faster first-page load performance
+      
+
 
 Move into the project folder:
 cd my-angular-app
