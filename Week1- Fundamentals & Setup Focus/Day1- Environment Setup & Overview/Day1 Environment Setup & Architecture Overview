@@ -53,10 +53,71 @@ Visual Studio 2022+ (Community Edition)	For ASP.NET Core	https://visualstudio.mi
 ➡️ In Visual Studio, install the ASP.NET and web development workload during setup.
 
 🔹 Part 2: Create First Angular App
+
+Note: Angular from version 17 onward (you’re on 19.2.6) introduced a standalone API, allowing you to create Angular applications without NgModules. 
+Instead of defining components inside a @NgModule, everything is handled via standalone components and app configuration files.
+
+⚔️ Standalone vs No-Standalone in Angular 17+
+
+Feature	            Standalone (default from Angular 17+)	      No-Standalone (Traditional Module-Based)
+
+Introduced in	      Angular 14 (mature in Angular 17+)	            Angular since version 2
+Project creation	      ng new myapp (default standalone)	            ng new myapp --no-standalone
+Main file	             main.ts uses bootstrapApplication()	      main.ts uses bootstrapModule(AppModule)
+AppModule file	      ❌ Not created or needed	                  ✅ Required: app.module.ts
+app.config.ts	      ✅ Used for providers and routes      	      ❌ Not used
+Component setup	      standalone: true in @Component	            No need for standalone: true
+Imports in components	Must import other components/pipes directly	Imports managed via NgModule
+Routing setup	      Via provideRouter() in app.config.ts	      Via RouterModule.forRoot() in AppModule
+Performance	            Better tree-shaking and lazy-loading	      Slightly more overhead
+Learning curve	      Slightly new pattern	                        Familiar for most tutorials/interviews
+Flexibility	            More fine-grained, modular	                  Centralized structure
+Angular CLI default	✅ From Angular 17+	                        ❌ Must use --no-standalone flag
+
+
+🔍 Example Comparison
+
+✅ Standalone Component:
+@Component({
+  standalone: true,
+  selector: 'app-hello',
+  template: `<h1>Hello</h1>`,
+  imports: [CommonModule] // You import dependencies directly
+})
+export class HelloComponent {}
+
+❌ Traditional (No-Standalone) Component:
+@Component({
+  selector: 'app-hello',
+  template: `<h1>Hello</h1>`
+})
+export class HelloComponent {}
+
+// Declared inside AppModule
+@NgModule({
+  declarations: [HelloComponent]
+})
+export class AppModule {}
+
+🧠 When to Use What?
+You Should Use...	      If You Want To...
+✅ Standalone	      Build modern, modular apps with less boilerplate
+✅ Standalone	      Learn cutting-edge Angular features
+❌ No-Standalone	      Follow traditional tutorials or interview patterns
+❌ No-Standalone	      Work on legacy codebases or large enterprise apps
+🔧 How to Choose       While Creating a Project
+
+✅ Standalone (Default in Angular 17+):
+ng new my-app
+
+❌ No-Standalone (Classic AppModule-based):
+ng new my-app --no-standalone
+
+
 ▶️ Step-by-step:
 
 Open terminal:
-ng new demo-angular-app
+ng new demo-angular-app --no-standalone
 
 Choose:
 Yes for routing
