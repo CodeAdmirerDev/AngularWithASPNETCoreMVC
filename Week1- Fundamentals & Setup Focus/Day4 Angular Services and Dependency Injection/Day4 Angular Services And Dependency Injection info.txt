@@ -99,27 +99,65 @@ API calls using HttpClient
 Observables and Subscriptions
 RxJS basics (map, catchError)
 
+
+🟡 Intermediate Level – Angular Services & Dependency Injection
+✅ 1. @Injectable() and How Services Become Injectable
+
 🔸 @Injectable() and providedIn: 'root'
 @Injectable() is a decorator that marks a class as available to be injected.
 
 providedIn: 'root' makes the service a singleton and available throughout the app without registering it in a module.
-
+✅ Syntax:
+import { Injectable } from '@angular/core';
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root' // Optional, tells Angular to create one global instance
 })
-export class MyService {}
+export class UserService {
+  constructor() { }
+}
 
 📌 This ensures Angular automatically creates one instance of the service and shares it globally.
+
+or
+
+🔸 What is @Injectable()?
+It’s a decorator that tells Angular:
+“This class might have dependencies. Please manage it and allow it to be injected elsewhere.”
+
+
+💡 Why it matters:
+If you inject other services into this service, Angular needs to know how to resolve them. @Injectable() handles that.
+
+✅ 2. Service Injection Scope
+🔹 providedIn: 'root'
+Angular creates one instance for the entire app (singleton).
+Most commonly used.
+
+🔹 providedIn: 'any'
+A new instance for each lazy-loaded module.
+Useful for modular apps.
+
+🔹 Registering in a Module
+Alternatively, register in providers array of a specific module:
+@NgModule({
+  providers: [UserService]
+})
+export class AdminModule { }
+
+Service will be available only to that module and its components.
+
+✅ 3. API Calls using HttpClient
 
 🔸 What is HttpClientModule?
 Angular uses HttpClientModule to make HTTP calls (GET, POST, etc.) to remote servers (APIs).
 It’s based on Observables and provides powerful features like:
+  Streamed data
+  Error handling
+  Request/response transformations
 
-Streamed data
-Error handling
-Request/response transformations
+Angular's HttpClient service (from @angular/common/http) lets you make API requests easily.
 
-Step to use it:
+🔧 Setup: Import in app.module.ts
 import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
@@ -127,18 +165,89 @@ import { HttpClientModule } from '@angular/common/http';
 })
 export class AppModule {}
 
+📄 Sample Service:
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { User } from '../models/user.model';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class UserService {
+  private apiUrl = 'https://jsonplaceholder.typicode.com/users';
+
+  constructor(private http: HttpClient) {}
+
+  getUsers(): Observable<User[]> {
+    return this.http.get<User[]>(this.apiUrl);
+  }
+}
+
+✅ 4. Observables & Subscriptions
+Angular uses Observables (from RxJS) for all async operations — especially HTTP requests.
+
 🔸 Observables in Services
 Angular uses RxJS Observables to handle asynchronous operations like HTTP calls.
 
-Why Observables?
+💡 What is an Observable?
+An object that emits values over time (like a stream).
 
+Why Observables?
 They are powerful and composable.
 You can use operators like map, filter, catchError, etc.
 You can unsubscribe to avoid memory leaks.
 
-getUsers(): Observable<User[]> {
-  return this.http.get<User[]>(this.apiUrl);
+
+💡 What is a Subscription?
+Listening to that stream and reacting to emitted values.
+
+👇 Usage Example:
+this.userService.getUsers().subscribe(users => {
+  this.users = users;
+});
+❗️Important: Unsubscribe when the component is destroyed to avoid memory leaks (or use async pipe).
+
+✅ 5. RxJS Basics (map, catchError, etc.)
+
+🔹 map – Transforms the data coming from the API
+getUsers(): Observable<string[]> {
+  return this.http.get<User[]>(this.apiUrl).pipe(
+    map(users => users.map(u => u.name)) // return only names
+  );
 }
+
+🔹 catchError – Handles errors gracefully
+import { catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
+
+getUsers(): Observable<User[]> {
+  return this.http.get<User[]>(this.apiUrl).pipe(
+    catchError(error => {
+      console.error('Error occurred:', error);
+      return of([]); // return empty array if error
+    })
+  );
+}
+
+🔁 Quick Summary Table
+
+Concept	Description
+@Injectable()	      Marks a service as injectable and allows DI
+providedIn: 'root'	Makes service a singleton, shared app-wide
+HttpClient	        Used for API communication
+Observable	        Represents a stream of async data
+Subscription	      Listens to the Observable and executes logic on data emit
+RxJS map	          Transforms data (e.g., filtering, formatting)
+RxJS catchError	    Catches and handles errors from an Observable
+
+✅ Best Practices for Intermediate Level
+✅ Keep API logic only in services (not in components)
+✅ Always use models/interfaces for typed data
+✅ Use async pipe in templates to avoid manual unsubscribe()
+✅ Use catchError to provide fallback/default values
+✅ Keep services stateless (unless you’re intentionally sharing state)
+
 
 🔴 Expert Level
 
@@ -151,68 +260,101 @@ Dependency Injection Tokens
 Unit Testing Services with HttpTestingController
 Use RxJS operators (switchMap, mergeMap, retry, debounceTime, etc.)
 
-🔸 Injectable Hierarchy
-providedIn: 'root' – Service is app-wide (Singleton).
-providedIn: 'any' – New instance in each lazy-loaded module.
 
-Provided in component – New instance for each component.
+🧠 1. Injectable Hierarchy
 
-🔸 Angular Interceptors
-Interceptors are a way to intercept and manipulate HTTP requests or responses globally.
+✅ Levels of Injection:
+providedIn: 'root' → App-wide singleton (most common).
+providedIn: 'any' → One instance per lazy-loaded module.
 
-Use cases:
+Component providers: [] → New instance for each component.
+@Injectable({
+  providedIn: 'any'
+})
+export class ScopedService {}
 
-Add authentication tokens
-Show loading indicators
-Log requests
+🔄 Use providedIn: 'any' for module encapsulation, helpful when services should not share state across the app.
 
-Example:
+🧠 2. Lazy-loaded Module Service Scope
+🔧 Example:
+@NgModule({
+  providers: [AdminService]
+})
+export class AdminModule {}
+If AdminModule is lazy-loaded, AdminService will be scoped only to it, allowing you to:
+Limit memory usage
+Avoid unintended shared state
 
-intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-  const modifiedReq = req.clone({ setHeaders: { Authorization: 'Bearer token' }});
-  return next.handle(modifiedReq);
+🧠 3. HTTP Interceptors
+Interceptors let you intercept all HTTP requests/responses for:
+Adding tokens
+Logging
+Showing spinners
+Handling global errors
+
+
+📄 Create Auth Interceptor:
+
+@Injectable()
+export class AuthInterceptor implements HttpInterceptor {
+  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    const token = 'dummy-token';
+    const authReq = req.clone({
+      setHeaders: { Authorization: `Bearer ${token}` }
+    });
+    return next.handle(authReq);
+  }
 }
 
-🔸 Using Interfaces for Strong Typing
+🧩 Register Interceptor:
 
-To write clean and maintainable code, create TypeScript interfaces that match API data structures.
+providers: [
+  {
+    provide: HTTP_INTERCEPTORS,
+    useClass: AuthInterceptor,
+    multi: true
+  }
+]
+✅ multi: true allows multiple interceptors.
 
-export interface User {
-  id: number;
-  name: string;
-  email: string;
+🧠 4. Abstract Services & Interfaces
+You can create abstract base services or use interfaces to enforce structure.
+
+✅ Abstract Example:
+export abstract class BaseService<T> {
+  abstract getAll(): Observable<T[]>;
 }
+Now your services like UserService, ProductService can extend it.
 
-Then in your service:
+🧠 5. Dependency Injection Tokens
+Use InjectionToken when injecting:
 
-getUsers(): Observable<User[]> {
-  return this.http.get<User[]>(this.apiUrl);
-}
+Primitive values (like strings, booleans)
 
-✅ Now your data is strongly typed and you get IntelliSense + compile-time checks.
+Config objects
 
-🔸 BehaviorSubject for Shared State
-Sometimes you need to share data between unrelated components (not parent-child). Use BehaviorSubject.
+Multiple implementations of an interface
 
-private messageSource = new BehaviorSubject<string>('Default');
-currentMessage = this.messageSource.asObservable();
+🔧 Example:
+export const API_URL = new InjectionToken<string>('apiUrl');
 
-updateMessage(newMsg: string) {
-  this.messageSource.next(newMsg);
-}
-Now, any component subscribing to currentMessage will get updated automatically when it changes.
+@NgModule({
+  providers: [
+    { provide: API_URL, useValue: 'https://api.example.com' }
+  ]
+})
+export class AppModule {}
 
-🔸 Unit Testing Services (HttpTestingController)
+constructor(@Inject(API_URL) private apiUrl: string) {}
 
-Angular provides tools to test services with HTTP calls using HttpClientTestingModule.
-
-beforeEach(() => {
-  TestBed.configureTestingModule({
-    imports: [HttpClientTestingModule],
-    providers: [UserService]
-  });
+🧠 6. Unit Testing Services with HttpTestingController
+✅ Setup:
+TestBed.configureTestingModule({
+  imports: [HttpClientTestingModule],
+  providers: [UserService]
 });
 
+✅ Test:
 it('should fetch users', () => {
   const dummyUsers = [{ id: 1, name: 'John' }];
   
@@ -220,9 +362,43 @@ it('should fetch users', () => {
     expect(users).toEqual(dummyUsers);
   });
 
-  const req = httpMock.expectOne(service.apiUrl);
+  const req = httpMock.expectOne('https://jsonplaceholder.typicode.com/users');
+  expect(req.request.method).toBe('GET');
   req.flush(dummyUsers);
 });
+
+🧠 7. RxJS Operators – Advanced Use Cases
+
+Operator	      Description / Use Case
+switchMap	      Cancel previous observable when new value comes (e.g., type-ahead search)
+mergeMap	      Run all observables concurrently (e.g., nested calls)
+concatMap	      Queue observable calls one after the other
+retry	          Automatically retry failed HTTP requests
+debounceTime	  Delay emissions (great for input search)
+catchError	    Gracefully handle errors
+
+🔧 Example with switchMap and debounceTime (search API):
+
+this.searchControl.valueChanges.pipe(
+  debounceTime(300),
+  switchMap(query => this.apiService.search(query))
+).subscribe(results => this.results = results);
+
+✅ Final Summary
+
+Concept	                What You Gain
+
+Injectable hierarchy	  Fine-grained control of service scope
+Lazy module DI	        Encapsulation, performance optimization
+Interceptors	          Global control over HTTP traffic
+Abstract services	      Reusability and consistent contracts
+Injection tokens	      Inject configs or multiple implementations safely
+HttpTestingController	  Clean & fast unit tests for services
+Advanced RxJS	          Reactive, high-performance, real-time UI behavior
+
+💡 Pro Tip
+Create a core module for global singletons (e.g., logging, auth), and a shared module for common pipes/components.
+
 
 🛡 Best Practices Summary
 
