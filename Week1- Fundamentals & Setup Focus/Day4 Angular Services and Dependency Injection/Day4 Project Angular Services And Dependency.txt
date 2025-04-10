@@ -1,0 +1,141 @@
+Let's build a small project using Angular 19 (non-standalone) based on Day 4 topics:
+
+✅ Angular Services
+✅ Dependency Injection
+✅ HttpClientModule
+✅ Observables & RxJS Basics
+
+🛠️ Project: User Management App
+
+We'll create a simple app that fetches a list of users from a public API and displays them using a service.
+
+🔁 Step-by-Step Guide (Angular 19 – Non-Standalone)
+✅ Step 1: Create a New Angular App
+
+ng new user-management-app --routing --style=scss
+
+Choose No when asked for standalone components.
+
+✅ Step 2: Generate Components and Service
+
+cd user-management-app
+ng generate component components/user-list
+ng generate service services/user
+ng generate interface models/user
+
+✅ Step 3: Add HttpClientModule
+Open app.module.ts and add:
+
+import { HttpClientModule } from '@angular/common/http';
+
+@NgModule({
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    HttpClientModule
+  ]
+})
+export class AppModule { }
+
+✅ Step 4: Define a User Interface
+📄 src/app/models/user.ts
+
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+✅ Step 5: Create User Service
+📄 src/app/services/user.service.ts
+
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, catchError, of } from 'rxjs';
+import { User } from '../models/user';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class UserService {
+  private apiUrl = 'https://jsonplaceholder.typicode.com/users';
+
+  constructor(private http: HttpClient) {}
+
+  getUsers(): Observable<User[]> {
+    return this.http.get<User[]>(this.apiUrl).pipe(
+      catchError(error => {
+        console.error('Error fetching users:', error);
+        return of([]); // fallback
+      })
+    );
+  }
+}
+
+✅ Step 6: Use Service in Component
+📄 src/app/components/user-list/user-list.component.ts
+import { Component, OnInit } from '@angular/core';
+import { UserService } from 'src/app/services/user.service';
+import { User } from 'src/app/models/user';
+
+@Component({
+  selector: 'app-user-list',
+  templateUrl: './user-list.component.html',
+  styleUrls: ['./user-list.component.scss']
+})
+export class UserListComponent implements OnInit {
+  users: User[] = [];
+
+  constructor(private userService: UserService) {}
+
+  ngOnInit(): void {
+    this.userService.getUsers().subscribe(data => {
+      this.users = data;
+    });
+  }
+}
+
+✅ Step 7: Display Data in HTML
+📄 src/app/components/user-list/user-list.component.html
+
+<h2>User List</h2>
+<ul *ngIf="users.length; else noData">
+  <li *ngFor="let user of users">
+    <strong>{{ user.name }}</strong> - {{ user.email }}
+  </li>
+</ul>
+
+<ng-template #noData>
+  <p>No users available.</p>
+</ng-template>
+
+✅ Step 8: Add Route in app-routing.module.ts
+
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+import { UserListComponent } from './components/user-list/user-list.component';
+
+const routes: Routes = [
+  { path: 'users', component: UserListComponent },
+  { path: '', redirectTo: 'users', pathMatch: 'full' }
+];
+
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule]
+})
+export class AppRoutingModule { }
+
+✅ Step 9: Run the App
+ng serve
+
+Visit 👉 http://localhost:4200/users
+
+You’ll see the list of users from the public API.
+
+🧠 Best Practices Demonstrated:
+Reusable service (UserService)
+Scoped model (User interface)
+Proper use of HttpClientModule
+catchError for graceful error handling
+providedIn: 'root' singleton scope
