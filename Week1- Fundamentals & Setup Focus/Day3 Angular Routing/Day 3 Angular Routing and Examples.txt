@@ -1,10 +1,24 @@
 ✅ Day 3: Angular Routing (for Beginners - Angular v19 with Module-based Setup)
 
 🔹 What is Routing in Angular?
-Routing in Angular is the mechanism that allows you to navigate between different views or pages in a Single Page Application (SPA) without reloading the whole page. It uses the browser’s history API under the hood.
+Routing in Angular is the mechanism that allows you to navigate between different views or pages in a Single Page Application (SPA) without reloading the whole page. 
+It uses the browser’s history API under the hood.
 
 🛠️ 1. Configure Routes
 In Angular, routes are configured using the RouterModule in your main module (usually app.module.ts) or in a separate routing module (app-routing.module.ts).
+
+Open terminal:
+ng new demo-angular-app --no-standalone
+
+or
+
+Set Up Routing in Angular 19
+When creating a new project, enable routing:
+
+ng new my-routing-app --routing
+cd my-routing-app
+ng serve
+The --routing flag generates a app-routing.module.ts.
 
 🔸 Setup process Step-by-Step:
 ✅ a. Create Components
@@ -45,7 +59,7 @@ export class AppRoutingModule {}
 <nav>
   <a routerLink="/">Home</a> |
   <a routerLink="/about">About</a> |
-  <a [routerLink]="['/product', 101]">Product 101</a>
+  <a [routerLink]="['/product', 4]">Product 4</a>
 </nav>
 <hr />
 <router-outlet></router-outlet>
@@ -121,3 +135,156 @@ src/
  ┃ ┣ product-details/
  ┃ ┣ app-routing.module.ts ✅
  ┃ ┗ app.module.ts ✅
+
+
+
+
+If you want to learn further go through the below things:
+=========================================================
+
+Here's a 14-Day Hands-on Practice Plan to master Angular 19 routing — from basic navigation to advanced concepts like lazy loading, route guards, prerendering, and SSR.
+
+Each day includes:
+
+✅ What you’ll learn
+🔧 Tasks
+🧪 Mini project or exercise
+
+🗓️ 14-Day Angular Routing Mastery Plan
+
+📅 Day 1: Intro to Routing
+
+✅ Learn:
+Routing basics
+RouterModule
+routerLink, router-outlet
+
+🔧 Tasks:
+Create HomeComponent, AboutComponent
+Setup routes in app-routing.module.ts
+🧪 Project:
+ng new angular-routing --routing
+
+📅 Day 2: Static Routes & Navigation
+
+✅ Learn:
+Navigating with routerLink
+Active link styling
+🔧 Tasks:
+Add navigation bar with links
+Use routerLinkActive
+🧪 Exercise:
+Highlight active menu item on page change
+
+📅 Day 3: Dynamic Route Parameters
+✅ Learn:
+How to use :id in routes
+Use ActivatedRoute to read params
+🔧 Tasks:
+Create ProductComponent
+Route: /product/:id
+🧪 Exercise:
+Display product ID from URL
+
+📅 Day 4: Query Params
+✅ Learn:
+Working with ? parameters
+queryParamMap
+🔧 Tasks:
+Route: /search?query=shoes
+Capture and display query param
+🧪 Exercise:
+Create a search box and redirect with query param
+
+📅 Day 5: Nested Routes (Child Routing)
+✅ Learn:
+Define child routes
+Use <router-outlet> inside a component
+🔧 Tasks:
+Create AdminComponent with users and settings as children
+🧪 Exercise:
+Load users/settings based on tabs or buttons
+
+📅 Day 6: Wildcards & Redirects
+✅ Learn:
+redirectTo
+** wildcard routes
+🔧 Tasks:
+Redirect / to /home
+Show PageNotFoundComponent for invalid paths
+🧪 Exercise:
+Implement a 404 page
+
+📅 Day 7: Navigation Programmatically
+✅ Learn:
+Use Router to navigate in code
+🔧 Tasks:
+Create buttons to redirect to other pages via router.navigate()
+🧪 Exercise:
+Add a login button that redirects on click
+
+📅 Day 8: Lazy Loading Modules
+✅ Learn:
+Use loadChildren to lazy load feature modules
+🔧 Tasks:
+Create a ProductsModule
+Load it lazily with /products
+🧪 Exercise:
+Setup route: /products/list, /products/:id
+
+📅 Day 9: Route Guards (CanActivate)
+✅ Learn:
+Create and apply AuthGuard
+🔧 Tasks:
+Protect /dashboard route
+Show "Access Denied" if unauthenticated
+🧪 Exercise:
+Simulate login/logout toggle
+
+📅 Day 10: CanDeactivate & CanLoad Guards
+✅ Learn:
+Prevent navigating away from a component
+Control module loading
+🔧 Tasks:
+Add CanDeactivate to a form
+Use CanLoad with lazy modules
+🧪 Exercise:
+Ask "Are you sure?" if form is dirty
+
+📅 Day 11: Route Resolvers
+✅ Learn:
+Use Resolve to fetch data before route loads
+🔧 Tasks:
+Create ProductResolver to load product details before showing the page
+🧪 Exercise:
+Display a loading spinner until data is ready
+
+📅 Day 12: Animations Between Routes
+✅ Learn:
+Use Angular animations for route transitions
+🔧 Tasks:
+Add animations on route changes
+🧪 Exercise:
+Fade in/fade out between components
+
+📅 Day 13: Angular SSR Routing with Prerendering
+✅ Learn:
+Prerender routes using withPrerendering
+🔧 Tasks:
+Update main.server.ts to statically render /about, /product/101
+🧪 Exercise:
+Try ng run your-app:prerender and check the generated files
+
+📅 Day 14: Mini Project — E-Commerce Starter
+✅ Create:
+Home, Product List, Product Details
+Admin Module (lazy loaded)
+AuthGuard, ProductResolver
+Pre-render popular product pages
+🔧 Bonus:
+Add loading indicators and breadcrumbs
+
+🎁 Bonus Tips
+Use Angular Router Docs for reference.
+Add route titles with TitleStrategy.
+Try routing with observables and RxJS.
