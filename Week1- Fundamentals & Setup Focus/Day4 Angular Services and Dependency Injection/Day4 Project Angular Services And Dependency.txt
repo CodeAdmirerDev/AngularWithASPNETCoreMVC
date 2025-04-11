@@ -26,14 +26,29 @@ ng generate interface models/user
 ✅ Step 3: Add HttpClientModule
 Open app.module.ts and add:
 
-import { HttpClientModule } from '@angular/common/http';
+import { NgModule } from '@angular/core';
+import { BrowserModule, provideClientHydration, withEventReplay } from '@angular/platform-browser';
+import { provideHttpClient, withFetch } from '@angular/common/http';
+import { AppRoutingModule } from './app-routing.module';
+import { RouterModule } from '@angular/router'; // ✅ Add this line
+import { AppComponent } from './app.component';
+import { UserListComponent } from './components/user-list/user-list.component';
 
 @NgModule({
+  declarations: [
+    AppComponent
+  ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    HttpClientModule
-  ]
+    RouterModule, // ✅ Add this to recognize <router-outlet>
+    UserListComponent  // ✅ declare component
+  ],
+  providers: [
+    provideClientHydration(withEventReplay()),
+    provideHttpClient(withFetch())
+  ],
+  bootstrap: [AppComponent]
 })
 export class AppModule { }
 
@@ -74,18 +89,25 @@ export class UserService {
 
 ✅ Step 6: Use Service in Component
 📄 src/app/components/user-list/user-list.component.ts
+
 import { Component, OnInit } from '@angular/core';
-import { UserService } from 'src/app/services/user.service';
-import { User } from 'src/app/models/user';
+import { User } from '../../models/user';
+import { UserService } from '../../services/user.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-user-list',
   templateUrl: './user-list.component.html',
-  styleUrls: ['./user-list.component.scss']
+  imports: [CommonModule]
 })
 export class UserListComponent implements OnInit {
-  users: User[] = [];
-
+  users: User[] = [
+    { id: 1, name: 'Suri', email: 'suri@example.com' },
+    { id: 2, name: 'Monica', email: 'monica@example.com' },
+    { id: 3, name: 'Ravi', email: 'ravi@example.com' },
+    { id: 4, name: 'Priya', email: 'priya@example.com' },
+    { id: 5, name: 'Kiran', email: 'kiran@example.com' }
+  ];
   constructor(private userService: UserService) {}
 
   ngOnInit(): void {
@@ -94,6 +116,7 @@ export class UserListComponent implements OnInit {
     });
   }
 }
+
 
 ✅ Step 7: Display Data in HTML
 📄 src/app/components/user-list/user-list.component.html
