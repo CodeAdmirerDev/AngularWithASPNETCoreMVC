@@ -1,0 +1,14 @@
+<p>Emp list</p>
+
+<ul *ngIf="emps.length; else noData" >
+
+    <li *ngFor="let emp of emps">
+        <strong>{{emp.empName}} |  </strong> {{emp.empsal}} 
+
+    </li>
+</ul>
+
+
+<ng-template #noData>
+    <p>No Emps available.</p>
+  </ng-template>
