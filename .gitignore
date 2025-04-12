@@ -1,0 +1,7 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/Week1- Fundamentals & Setup Focus/Day5 ASPNET Core MVC Basics/DemoASPNETCoreMVCApp/.vs/DemoASPNETCoreMVCApp
+/Week1- Fundamentals & Setup Focus/Day5 ASPNET Core MVC Basics/DemoASPNETCoreMVCApp/bin/Debug/net8.0
+/Week1- Fundamentals & Setup Focus/Day5 ASPNET Core MVC Basics/DemoASPNETCoreMVCApp/obj
