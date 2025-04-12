@@ -87,7 +87,7 @@ Startup.cs (in earlier versions)
 🔹 5. Step-by-Step Guide – ASP.NET Core 8 MVC (Beginner to Advanced)
 
 ✅ Step 1: Create a New Project
-dotnet new mvc -n MvcDemoApp
+dotnet new mvc -n DemoASPNETCoreMVCApp
 cd MvcDemoApp
 code .
 
