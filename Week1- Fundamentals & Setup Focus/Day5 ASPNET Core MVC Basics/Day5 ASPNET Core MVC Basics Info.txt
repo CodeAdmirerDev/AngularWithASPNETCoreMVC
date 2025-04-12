@@ -1,0 +1,156 @@
+Let's break down Day 5: ASP.NET Core 8 MVC Basics into a complete beginner-to-advanced guide. 
+
+This will cover:
+What is MVC in ASP.NET Core?
+Understanding Controllers, Views, and Models
+Razor Syntax Basics
+ASP.NET Core Project Structure
+
+
+Step-by-step Hands-on Practice
+
+🔹 1. What is ASP.NET Core MVC?
+
+MVC stands for:
+Model – Data and business logic.
+View – UI rendered to the user.
+Controller – Handles user input, updates model, selects view.
+
+🧠 Think of it as:
+User -> Controller -> (Model + View) -> HTML to Browser
+
+ASP.NET Core MVC is a lightweight, testable framework ideal for web apps using HTML, CSS, JavaScript.
+
+🔹 2. Controllers, Views, Models - Deep Dive
+
+✅ Controllers
+A C# class that handles incoming HTTP requests.
+Located in the Controllers folder.
+Inherits from Controller.
+public class HomeController : Controller
+{
+    public IActionResult Index()
+    {
+        return View(); // Loads Views/Home/Index.cshtml
+    }
+}
+
+✅ Views
+.cshtml files using Razor syntax to mix HTML + C#.
+
+Stored in Views/{ControllerName}/.
+
+Example:
+<h1>Hello, @Model.Name!</h1>
+
+✅ Models
+Represent the data structure of your application.
+Placed in the Models folder.
+
+public class Employee
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+}
+
+🔹 3. Razor Syntax Basics
+Razor allows embedding C# into HTML:
+
+Syntax	                        Description
+@Model.                         Property	Display model data
+@{ ... }	                      C# block
+@if (true) { ... }	            Conditional logic
+@foreach                        (var item in Model)	Loops
+@Html.DisplayFor(m => m.Name)	  Strongly typed display helper
+
+🔹 4. Project Structure Overview
+
+Typical ASP.NET Core MVC structure:
+
+/Controllers
+    HomeController.cs
+/Models
+    Employee.cs
+/Views
+    /Home
+        Index.cshtml
+        About.cshtml
+    /Shared
+        _Layout.cshtml
+        _ValidationScriptsPartial.cshtml
+wwwroot/
+    css/
+    js/
+Program.cs
+Startup.cs (in earlier versions)
+
+🔹 5. Step-by-Step Guide – ASP.NET Core 8 MVC (Beginner to Advanced)
+
+✅ Step 1: Create a New Project
+dotnet new mvc -n MvcDemoApp
+cd MvcDemoApp
+code .
+
+✅ Step 2: Create a Model
+
+// Models/Employee.cs
+public class Employee
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public decimal Salary { get; set; }
+}
+
+✅ Step 3: Create a Controller
+
+// Controllers/EmployeeController.cs
+public class EmployeeController : Controller
+{
+    public IActionResult Index()
+    {
+        var emps = new List<Employee>
+        {
+            new Employee { Id = 1, Name = "Suri", Salary = 120000 },
+            new Employee { Id = 2, Name = "Monu", Salary = 100000 }
+        };
+        return View(emps); // Pass data to View
+    }
+}
+
+✅ Step 4: Create a View
+
+<!-- Views/Employee/Index.cshtml -->
+@model List<MvcDemoApp.Models.Employee>
+
+<h2>Employee List</h2>
+<table>
+    <thead>
+        <tr><th>Name</th><th>Salary</th></tr>
+    </thead>
+    <tbody>
+    @foreach (var emp in Model)
+    {
+        <tr>
+            <td>@emp.Name</td>
+            <td>@emp.Salary</td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+✅ Step 5: Update Route in Program.cs (if needed)
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Employee}/{action=Index}/{id?}");
+
+🔁 Bonus Advanced Steps (Later Days)
+✅ Add Forms with POST methods
+✅ Use ViewModels for custom input/output
+✅ Add Validation with Data Annotations
+✅ Connect to SQL Server using EF Core
+✅ Use Dependency Injection and Repositories
+✅ Setup Layout pages, Partial Views
+✅ Add Authentication & Authorization
+
+If you want to foucs more on this topics please look into the below repo:
+https://github.com/CodeAdmirerDev/ASP.NET-Core-7-MVC-Topics 
