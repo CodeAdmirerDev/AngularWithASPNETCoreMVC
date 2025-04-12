@@ -1,0 +1,196 @@
+🌐 Day 6: ASP.NET Core 8 Routing
+
+We'll cover:
+✅ What is Routing?
+✅ Conventional vs. Attribute Routing
+✅ Route Parameters
+✅ Action Methods – GET and POST
+✅ Step-by-step Practical Implementation
+🔁 Bonus: Optional Parameters, Route Constraints, and Custom Routes
+
+✅ 1. What is Routing in ASP.NET Core?
+Routing is how ASP.NET Core matches an incoming URL to a specific controller action.
+
+Example:
+URL: /employee/details/3  
+→ Matches: EmployeeController → Details(int id = 3)
+
+✅ 2. Routing Types
+
+🔹 Conventional Routing
+Defined in Program.cs or Startup.cs.
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+Matches based on URL segments.
+
+Uses folder structure and method names.
+
+🔹 Attribute Routing
+Defined directly on controllers and actions using [Route].
+
+[Route("employee")]
+public class EmployeeController : Controller
+{
+    [Route("details/{id}")]
+    public IActionResult Details(int id) { ... }
+}
+✅ Gives more control over the URL structure.
+
+✅ 3. Route Parameters
+🔹 Required Parameter:
+[Route("employee/details/{id}")]
+public IActionResult Details(int id) {
+    // id is required
+}
+
+🔹 Optional Parameter:
+[Route("employee/details/{id?}")]
+public IActionResult Details(int? id) {
+    if (id == null) return NotFound();
+    ...
+}
+
+🔹 Default Value:
+[Route("employee/details/{id=1}")]
+public IActionResult Details(int id) {
+    // id defaults to 1 if not provided
+}
+
+✅ 4. Action Methods (GET and POST)
+
+🔹 GET Method – to display form or data
+
+[HttpGet]
+[Route("employee/create")]
+public IActionResult Create() {
+    return View();
+}
+
+🔹 POST Method – to submit form data
+[HttpPost]
+[Route("employee/create")]
+public IActionResult Create(Employee emp) {
+    if (ModelState.IsValid)
+    {
+        // Save logic
+        return RedirectToAction("Index");
+    }
+    return View(emp);
+}
+
+✅ 5. Step-by-Step Hands-on – Routing, Parameters, GET & POST
+
+
+
+🟢 Step 1: Create a New Project & Create a Model
+
+dotnet new mvc -n DemoASPNETCoreMVCAppWithRouting
+cd MvcDemoApp
+code .
+
+// Models/Employee.cs
+public class Employee
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public decimal Salary { get; set; }
+}
+
+🟢 Step 2: Create Controller with Attribute Routing
+
+[Route("employee")]
+public class EmployeeController : Controller
+{
+    private static List<Employee> _data = new List<Employee>
+    {
+        new Employee { Id = 1, Name = "Suri", Salary = 120000 },
+        new Employee { Id = 2, Name = "Monu", Salary = 110000 }
+    };
+
+    [HttpGet]
+    [Route("index")]
+    public IActionResult Index() => View(_data);
+
+    [HttpGet]
+    [Route("details/{id}")]
+    public IActionResult Details(int id)
+    {
+        var emp = _data.FirstOrDefault(e => e.Id == id);
+        if (emp == null) return NotFound();
+        return View(emp);
+    }
+
+    [HttpGet]
+    [Route("create")]
+    public IActionResult Create() => View();
+
+    [HttpPost]
+    [Route("create")]
+    public IActionResult Create(Employee emp)
+    {
+        emp.Id = _data.Max(e => e.Id) + 1;
+        _data.Add(emp);
+        return RedirectToAction("Index");
+    }
+}
+
+🟢 Step 3: Create Views
+✅ Views/Employee/Index.cshtml
+
+@model List<Employee>
+
+<h2>Employee List</h2>
+<a href="/employee/create">Add New</a>
+<ul>
+@foreach (var e in Model)
+{
+    <li>
+        <a href="/employee/details/@e.Id">@e.Name</a> - ₹@e.Salary
+    </li>
+}
+</ul>
+
+✅ Views/Employee/Details.cshtml
+
+@model Employee
+
+<h2>Employee Details</h2>
+<p>ID: @Model.Id</p>
+<p>Name: @Model.Name</p>
+<p>Salary: ₹@Model.Salary</p>
+
+✅ Views/Employee/Create.cshtml
+@model Employee
+
+<h2>Add Employee</h2>
+<form asp-action="Create" method="post">
+    <label>Name:</label>
+    <input asp-for="Name" /><br />
+    <label>Salary:</label>
+    <input asp-for="Salary" /><br />
+    <button type="submit">Add</button>
+</form>
+
+🔁 Bonus: Advanced Routing Features
+
+🔹 Route Constraints
+[Route("details/{id:int}")]
+
+🔹 Catch-All Routes
+[Route("search/{*keyword}")]
+
+🔹 Custom Named Routes
+[Route("employee/profile/{id}", Name = "EmpProfile")]
+
+✅ Summary
+Concept	            Description
+Routing	            Maps URL to controller action
+Attribute           Routing	Decorates controllers/actions directly
+Route Parameters	  Pass data via URL
+GET Method         	Render pages
+POST Method	        Submit data
+
+If you want to learn more topics , please gothrough the below git repo:
+https://github.com/CodeAdmirerDev/ASP.NET-Core-7-MVC-Topics/tree/main/3%20RoutingImplementationInASPDotnetCore 
