@@ -1,0 +1,1 @@
+F:\Suri practies\AngularWithASPNETCoreMVC\Week1- Fundamentals & Setup Focus\Day7 Practice ToDoFullstackApp\ToDoFullStackApp\todofullstackapp.client\obj\Debug\todofullstackapp.client.esproj.CoreCompileInputs.cache
