@@ -1,0 +1,12 @@
+﻿@model List<Employee>
+
+<h2>Employee List</h2>
+<a href="/employee/create">Add New</a>
+<ul>
+    @foreach (var e in Model)
+    {
+        <li>
+            <a href="/employee/details/@e.Id">@e.Name</a> - ₹@e.Salary
+        </li>
+    }
+</ul>
