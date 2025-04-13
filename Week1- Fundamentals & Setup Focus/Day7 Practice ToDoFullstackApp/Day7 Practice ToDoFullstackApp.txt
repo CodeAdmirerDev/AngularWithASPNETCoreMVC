@@ -82,7 +82,8 @@ public class TodoController : ControllerBase
 
 🌐 Step 3: Create Angular 19 App Inside the Project
 Open terminal in the root folder of your solution:
-ng new client --routing --style=scss
+
+ng new clientapp --no-standalone
 
 Choose No for standalone components (as per your setup)
 
@@ -113,6 +114,7 @@ ng generate service services/todo
 
 📄 todo.model.ts
 Create a models/todo.model.ts:
+ng generate interface models/todo --type=model
 
 export interface Todo {
   id: number;
