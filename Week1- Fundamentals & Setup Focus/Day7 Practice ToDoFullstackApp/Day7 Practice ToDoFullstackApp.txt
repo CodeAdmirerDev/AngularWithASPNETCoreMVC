@@ -1,0 +1,236 @@
+Let’s build a full-stack ToDo App using Angular 19 and ASP.NET Core 8 — step by step. We'll cover both the frontend and backend, integrating them smoothly.
+
+🛠️ Tech Stack
+Frontend: Angular 19
+Backend: ASP.NET Core 8 Web API
+IDE: Visual Studio 2022
+Data: In-memory list (for now)
+
+📁 Step 1: Create ASP.NET Core 8 Web API Project
+
+Open Visual Studio 2022
+Select Create New Project → Choose ASP.NET Core Web API
+Name it: TodoAppFullstack
+Framework: .NET 8
+Uncheck Use HTTPS (for simplicity during dev)
+Uncheck Enable OpenAPI Support (Swagger) (optional)
+Click Create
+
+🧱 Step 2: Add a ToDo Model and Controller
+
+🧩 Create the TodoItem.cs Model
+
+In the Models folder, create TodoItem.cs:
+namespace TodoAppFullstack.Models
+{
+    public class TodoItem
+    {
+        public int Id { get; set; }
+        public string? Title { get; set; }
+        public bool IsCompleted { get; set; }
+    }
+}
+
+🚀 Create TodoController.cs
+In the Controllers folder, add TodoController.cs:
+
+using Microsoft.AspNetCore.Mvc;
+using TodoAppFullstack.Models;
+
+namespace TodoAppFullstack.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class TodoController : ControllerBase
+{
+    private static List<TodoItem> todos = new List<TodoItem>
+    {
+        new TodoItem { Id = 1, Title = "Learn Angular 19", IsCompleted = false },
+        new TodoItem { Id = 2, Title = "Build ASP.NET Core API", IsCompleted = true }
+    };
+
+    [HttpGet]
+    public IActionResult Get() => Ok(todos);
+
+    [HttpPost]
+    public IActionResult Add(TodoItem item)
+    {
+        item.Id = todos.Count + 1;
+        todos.Add(item);
+        return Ok(item);
+    }
+
+    [HttpPut("{id}")]
+    public IActionResult Update(int id, TodoItem updatedItem)
+    {
+        var item = todos.FirstOrDefault(t => t.Id == id);
+        if (item == null) return NotFound();
+        item.Title = updatedItem.Title;
+        item.IsCompleted = updatedItem.IsCompleted;
+        return Ok(item);
+    }
+
+    [HttpDelete("{id}")]
+    public IActionResult Delete(int id)
+    {
+        var item = todos.FirstOrDefault(t => t.Id == id);
+        if (item == null) return NotFound();
+        todos.Remove(item);
+        return NoContent();
+    }
+}
+
+🌐 Step 3: Create Angular 19 App Inside the Project
+Open terminal in the root folder of your solution:
+ng new client --routing --style=scss
+
+Choose No for standalone components (as per your setup)
+
+After it’s done:
+cd client
+npm install
+
+🔗 Step 4: Add Proxy to Connect Angular with ASP.NET Core
+
+In client/ folder, create proxy.conf.json:
+{
+  "/api": {
+    "target": "https://localhost:5001",
+    "secure": false,
+    "changeOrigin": true
+  }
+}
+
+In angular.json, under serve → options, add:
+
+"proxyConfig": "proxy.conf.json"
+
+💡 Step 5: Build the Angular ToDo App
+
+Generate Components and Service:
+ng generate component components/todo
+ng generate service services/todo
+
+📄 todo.model.ts
+Create a models/todo.model.ts:
+
+export interface Todo {
+  id: number;
+  title: string;
+  isCompleted: boolean;
+}
+
+🛠️ todo.service.ts
+
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Todo } from '../models/todo.model';
+import { Observable } from 'rxjs';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class TodoService {
+  private baseUrl = '/api/todo';
+
+  constructor(private http: HttpClient) {}
+
+  getTodos(): Observable<Todo[]> {
+    return this.http.get<Todo[]>(this.baseUrl);
+  }
+
+  addTodo(todo: Partial<Todo>): Observable<Todo> {
+    return this.http.post<Todo>(this.baseUrl, todo);
+  }
+
+  updateTodo(todo: Todo): Observable<Todo> {
+    return this.http.put<Todo>(`${this.baseUrl}/${todo.id}`, todo);
+  }
+
+  deleteTodo(id: number): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/${id}`);
+  }
+}
+
+🧩 todo.component.ts
+import { Component, OnInit } from '@angular/core';
+import { TodoService } from '../../services/todo.service';
+import { Todo } from '../../models/todo.model';
+
+@Component({
+  selector: 'app-todo',
+  templateUrl: './todo.component.html',
+  styleUrls: ['./todo.component.scss']
+})
+export class TodoComponent implements OnInit {
+  todos: Todo[] = [];
+  newTodo: string = '';
+
+  constructor(private todoService: TodoService) {}
+
+  ngOnInit() {
+    this.loadTodos();
+  }
+
+  loadTodos() {
+    this.todoService.getTodos().subscribe(data => this.todos = data);
+  }
+
+  addTodo() {
+    if (!this.newTodo.trim()) return;
+
+    const todo: Partial<Todo> = { title: this.newTodo, isCompleted: false };
+    this.todoService.addTodo(todo).subscribe(() => {
+      this.newTodo = '';
+      this.loadTodos();
+    });
+  }
+
+  toggleComplete(todo: Todo) {
+    todo.isCompleted = !todo.isCompleted;
+    this.todoService.updateTodo(todo).subscribe();
+  }
+
+  deleteTodo(id: number) {
+    this.todoService.deleteTodo(id).subscribe(() => this.loadTodos());
+  }
+}
+
+🧾 todo.component.html
+
+<div class="todo-container">
+  <h2>ToDo List</h2>
+
+  <input [(ngModel)]="newTodo" placeholder="Add new task" />
+  <button (click)="addTodo()">Add</button>
+
+  <ul>
+    <li *ngFor="let todo of todos">
+      <input type="checkbox" [checked]="todo.isCompleted" (change)="toggleComplete(todo)">
+      <span [class.completed]="todo.isCompleted">{{ todo.title }}</span>
+      <button (click)="deleteTodo(todo.id)">❌</button>
+    </li>
+  </ul>
+</div>
+
+Add this style to todo.component.scss:
+
+.completed {
+  text-decoration: line-through;
+}
+
+🧪 Step 6: Run Both Apps
+
+✅ Run ASP.NET Core (Visual Studio or CLI):
+dotnet run
+
+✅ Run Angular 19 (inside client/)
+ng serve
+
+Visit:
+Angular App → http://localhost:4200
+
+API → https://localhost:5001/api/todo
+
+🎉 Done!
+You now have a fully functional ToDo app with Angular 19 + ASP.NET Core 8 — clean integration!
