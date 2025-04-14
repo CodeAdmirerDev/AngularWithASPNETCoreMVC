@@ -1,0 +1,225 @@
+ Let's walk through a complete Intermediate-Level Web API using:
+
+✅ EF Core for database operations
+✅ DTOs + AutoMapper for clean mapping
+✅ Validation using [DataAnnotations]
+✅ Dependency Injection for the service layer
+✅ [FromRoute], [FromQuery] examples
+
+We’ll build a Product CRUD API step-by-step 💪
+
+✅ Step-by-Step Breakdown
+
+📦 Step 1: Create the ASP.NET Core Web API Project
+dotnet new webapi -n ProductApi
+cd ProductApi
+
+📦 Step 2: Add NuGet Packages
+dotnet add package Microsoft.EntityFrameworkCore
+dotnet add package Microsoft.EntityFrameworkCore.SqlServer
+dotnet add package Microsoft.EntityFrameworkCore.Tools
+dotnet add package AutoMapper.Extensions.Microsoft.DependencyInjection
+
+🧱 Step 3: Create Product Model (EF Entity)
+📁 Models/Product.cs
+public class Product
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public decimal Price { get; set; }
+}
+
+📄 Step 4: Create Product DTO with Validation
+📁 Dtos/ProductDto.cs
+public class ProductDto
+{
+    [Required]
+    public string Name { get; set; }
+
+    [Range(1, 100000)]
+    public decimal Price { get; set; }
+}
+
+📂 Step 5: Set Up DbContext
+📁 Data/ApplicationDbContext.cs
+public class ApplicationDbContext : DbContext
+{
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        : base(options) { }
+
+    public DbSet<Product> Products { get; set; }
+}
+
+🛠️ Register in Program.cs:
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+📁 appsettings.json
+
+"ConnectionStrings": {
+  "DefaultConnection": "Server=.;Database=ProductDb;Trusted_Connection=True;"
+}
+
+🔁 Step 6: Set Up AutoMapper
+📁 Mappings/ProductProfile.cs
+
+public class ProductProfile : Profile
+{
+    public ProductProfile()
+    {
+        CreateMap<Product, ProductDto>().ReverseMap();
+    }
+}
+
+📌 Register AutoMapper in Program.cs:
+
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+💼 Step 7: Create the Service Layer
+Services/IProductService.cs
+
+public interface IProductService
+{
+    Task<IEnumerable<Product>> GetAllAsync();
+    Task<Product> GetByIdAsync(int id);
+    Task<Product> CreateAsync(Product product);
+    Task<bool> UpdateAsync(int id, Product product);
+    Task<bool> DeleteAsync(int id);
+}
+
+Services/ProductService.cs
+
+public class ProductService : IProductService
+{
+    private readonly ApplicationDbContext _context;
+
+    public ProductService(ApplicationDbContext context) => _context = context;
+
+    public async Task<IEnumerable<Product>> GetAllAsync() =>
+        await _context.Products.ToListAsync();
+
+    public async Task<Product> GetByIdAsync(int id) =>
+        await _context.Products.FindAsync(id);
+
+    public async Task<Product> CreateAsync(Product product)
+    {
+        _context.Products.Add(product);
+        await _context.SaveChangesAsync();
+        return product;
+    }
+
+    public async Task<bool> UpdateAsync(int id, Product updated)
+    {
+        var existing = await _context.Products.FindAsync(id);
+        if (existing == null) return false;
+
+        existing.Name = updated.Name;
+        existing.Price = updated.Price;
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> DeleteAsync(int id)
+    {
+        var product = await _context.Products.FindAsync(id);
+        if (product == null) return false;
+
+        _context.Products.Remove(product);
+        await _context.SaveChangesAsync();
+        return true;
+    }
+}
+
+📌 Register in Program.cs:
+
+builder.Services.AddScoped<IProductService, ProductService>();
+
+📊 Step 8: Create Controller with AutoMapper, FromRoute, FromQuery
+Controllers/ProductsController.cs
+
+[ApiController]
+[Route("api/[controller]")]
+public class ProductsController : ControllerBase
+{
+    private readonly IProductService _service;
+    private readonly IMapper _mapper;
+
+    public ProductsController(IProductService service, IMapper mapper)
+    {
+        _service = service;
+        _mapper = mapper;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var products = await _service.GetAllAsync();
+        var dtos = _mapper.Map<IEnumerable<ProductDto>>(products);
+        return Ok(dtos);
+    }
+
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> GetById([FromRoute] int id)
+    {
+        var product = await _service.GetByIdAsync(id);
+        return product == null ? NotFound() : Ok(_mapper.Map<ProductDto>(product));
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] ProductDto dto)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        var product = _mapper.Map<Product>(dto);
+        var created = await _service.CreateAsync(product);
+
+        return CreatedAtAction(nameof(GetById), new { id = created.Id }, _mapper.Map<ProductDto>(created));
+    }
+
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Update([FromRoute] int id, [FromBody] ProductDto dto)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        var product = _mapper.Map<Product>(dto);
+        var success = await _service.UpdateAsync(id, product);
+
+        return success ? NoContent() : NotFound();
+    }
+
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete([FromRoute] int id)
+    {
+        var success = await _service.DeleteAsync(id);
+        return success ? NoContent() : NotFound();
+    }
+
+    [HttpGet("filter")]
+    public async Task<IActionResult> Filter([FromQuery] decimal minPrice)
+    {
+        var all = await _service.GetAllAsync();
+        var filtered = all.Where(p => p.Price >= minPrice);
+        return Ok(_mapper.Map<IEnumerable<ProductDto>>(filtered));
+    }
+}
+
+🧪 Step 9: Run Migrations & Test
+
+dotnet ef migrations add InitialCreate
+dotnet ef database update
+dotnet run
+
+Test with Swagger UI
+
+Try CRUD + [FromRoute], [FromQuery]
+
+💡 Summary
+🔧 Feature	            ✅ Implemented
+
+EF Core + Migrations	        ✅
+DTOs + AutoMapper	            ✅
+Model Validation	            ✅
+Dependency Injection	        ✅
+Full CRUD API	                ✅
+[FromRoute], [FromQuery]	    ✅
