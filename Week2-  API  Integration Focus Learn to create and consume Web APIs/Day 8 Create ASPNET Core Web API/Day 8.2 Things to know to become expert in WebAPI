@@ -2,13 +2,13 @@
 
 📚 Key Concepts Overview
 Area	                            Description
-🔥 Global Exception Middleware	Centralized error handling
-📝 Serilog	                    Structured & file-based logging
-🔐 JWT Authentication	          Secure APIs with bearer tokens
-🧬 AutoMapper	                  Handle complex DTO mappings
-📦 API                         Versioning	v1/v2 via route or headers
-🧪 Unit Testing	                xUnit + Moq for test coverage
-📊 Pagination & Filtering      	Clean, performant querying
+🔥 Global Exception Middleware	    Centralized error handling
+📝 Serilog	                        Structured & file-based logging
+🔐 JWT Authentication	            Secure APIs with bearer tokens
+🧬 AutoMapper	                    Handle complex DTO mappings
+📦 API                             Versioning	v1/v2 via route or headers
+🧪 Unit Testing	                    xUnit + Moq for test coverage
+📊 Pagination & Filtering      	    Clean, performant querying
 
 ✅ Step-by-Step Guide
 
