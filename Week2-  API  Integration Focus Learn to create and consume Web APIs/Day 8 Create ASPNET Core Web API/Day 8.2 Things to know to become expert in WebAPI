@@ -61,9 +61,14 @@ app.UseMiddleware<ExceptionMiddleware>();
 
 3️⃣ Add JWT Authentication
 
-dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer
+Install-Package Microsoft.AspNetCore.Authentication.JwtBearer -Version 8.0.4
+
 
 📁 Program.cs
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using WebAPITopicsForExpertLevel.Middlewares;
+
 
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer("Bearer", options =>
@@ -84,6 +89,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 📌 Secure endpoint:
+
+Create a ProductsController.cs file and add the below code:
 
 [Authorize]
 [HttpGet]
@@ -136,16 +143,74 @@ builder.Services.AddSwaggerGen(options =>
 
 6️⃣ Add Advanced AutoMapper Profiles
 
+Install-Package AutoMapper
+Install-Package AutoMapper.Extensions.Microsoft.DependencyInjection
+
+
+AutoMapperProfiles/ProductProfile
+
+public class Product
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public decimal Price { get; set; }
+    public string Description { get; set; }
+    public string Category { get; set; }
+    public string ImageUrl { get; set; }
+}
+
+public class ProductDTO
+{
+
+    public string ProductName { get; set; }
+    public decimal Price { get; set; }
+    public string ProductDescription { get; set; }
+    public string Category { get; set; }
+    public string ImageUrl { get; set; }
+}
+
+
 public class ProductProfile : Profile
 {
-    public ProductProfile()
-    {
-        CreateMap<Product, ProductDto>()
-            .ForMember(dest => dest.PriceWithTax, opt => opt.MapFrom(src => src.Price * 1.18M));
-    }
+  public ProductProfile()
+  {
+      CreateMap<Product, ProductDTO>()
+          .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Name))
+          .ForMember(dest => dest.ProductDescription, opt => opt.MapFrom(src => src.Description));
+
+  }
 }
 
 7️⃣ Add Pagination & Filtering
+
+ public interface IProductService
+ {
+     Task<IEnumerable<Product>> GetAllAsync();
+ }
+
+public class ProductService
+{
+    public List<Product> Products { get; set; }
+
+    public ProductService() {
+
+        Products = new List<Product>()
+        {
+            new Product { Id = 1, Name = "Product 1", Price = 10.99m, Description = "Description 1", Category = "Category 1", ImageUrl = "http://example.com/image1.jpg" },
+            new Product { Id = 2, Name = "Product 2", Price = 20.99m, Description = "Description 2", Category = "Category 2", ImageUrl = "http://example.com/image2.jpg" },
+            new Product { Id = 3, Name = "Product 3", Price = 30.99m, Description = "Description 3", Category = "Category 3", ImageUrl = "http://example.com/image3.jpg" },
+
+        };
+    }
+
+    public async Task<IEnumerable<Product>> GetAllAsync()
+    {
+        return  Products.ToList();
+    }
+}
+
+
+
 [HttpGet("paged")]
 public async Task<IActionResult> GetPaged([FromQuery] int page = 1, [FromQuery] int size = 10)
 {
