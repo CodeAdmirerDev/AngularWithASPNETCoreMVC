@@ -109,7 +109,25 @@ public class ProductController : ControllerBase
     }
 }
 
-✅ Step 5: Run and Test in Swagger
+
+
+
+✅ Step 5:Setup the Swagger and Run , Test  
+
+dotnet add package Swashbuckle.AspNetCore
+
+In Program.cs
+
+builder.Services.AddSwaggerGen(); // 🔥 Add this
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger(); // 🔥 Add this
+    app.UseSwaggerUI(); // 🔥 And this
+}
+
+Then,
 
 dotnet run
 Visit: https://localhost:5001/swagger/index.html
