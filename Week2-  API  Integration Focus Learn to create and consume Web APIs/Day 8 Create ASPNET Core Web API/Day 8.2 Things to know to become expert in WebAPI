@@ -1,0 +1,254 @@
+🧠 Expert Stage: Build a Production-Ready ASP.NET Core Web API
+
+📚 Key Concepts Overview
+Area	                            Description
+🔥 Global Exception Middleware	    Centralized error handling
+📝 Serilog	                        Structured & file-based logging
+🔐 JWT Authentication	            Secure APIs with bearer tokens
+🧬 AutoMapper	                    Handle complex DTO mappings
+📦 API                             Versioning	v1/v2 via route or headers
+🧪 Unit Testing	                    xUnit + Moq for test coverage
+📊 Pagination & Filtering      	    Clean, performant querying
+
+✅ Step-by-Step Guide
+
+1️⃣ Add Serilog Logging
+dotnet add package Serilog.AspNetCore
+dotnet add package Serilog.Sinks.File
+dotnet add package Serilog.Sinks.Console
+
+📁 Program.cs
+using Serilog;
+
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.File("Logs/log.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
+
+2️⃣ Add Global Exception Middleware
+📁 Middlewares/ExceptionMiddleware.cs
+
+public class ExceptionMiddleware
+{
+    private readonly RequestDelegate _next;
+    private readonly ILogger<ExceptionMiddleware> _logger;
+
+    public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
+    {
+        _next = next;
+        _logger = logger;
+    }
+
+    public async Task Invoke(HttpContext context)
+    {
+        try
+        {
+            await _next(context);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unhandled Exception");
+            context.Response.StatusCode = 500;
+            await context.Response.WriteAsJsonAsync(new { message = "Something went wrong." });
+        }
+    }
+}
+
+📌 In Program.cs
+app.UseMiddleware<ExceptionMiddleware>();
+
+3️⃣ Add JWT Authentication
+
+Install-Package Microsoft.AspNetCore.Authentication.JwtBearer -Version 8.0.4
+
+
+📁 Program.cs
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using WebAPITopicsForExpertLevel.Middlewares;
+
+
+builder.Services.AddAuthentication("Bearer")
+    .AddJwtBearer("Bearer", options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = "yourapp",
+            ValidAudience = "yourapp",
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("YourSuperSecretKey"))
+        };
+    });
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+📌 Secure endpoint:
+
+Create a ProductsController.cs file and add the below code:
+
+[Authorize]
+[HttpGet]
+public IActionResult SecureEndpoint() => Ok("This is protected.");
+
+4️⃣ Add API Versioning
+
+dotnet add package Microsoft.AspNetCore.Mvc.Versioning
+
+📁 Program.cs
+
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true;
+});
+
+📌 In Controller:
+
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/[controller]")]
+public class ProductsController : ControllerBase
+
+5️⃣ Customize Swagger
+
+dotnet add package Swashbuckle.AspNetCore
+
+📁 Program.cs
+
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new() { Title = "Product API", Version = "v1" });
+
+    var securityScheme = new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "JWT Authorization header using the Bearer scheme"
+    };
+    options.AddSecurityDefinition("Bearer", securityScheme);
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        { securityScheme, new[] { "Bearer" } }
+    });
+});
+
+6️⃣ Add Advanced AutoMapper Profiles
+
+Install-Package AutoMapper
+Install-Package AutoMapper.Extensions.Microsoft.DependencyInjection
+
+
+AutoMapperProfiles/ProductProfile
+
+public class Product
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public decimal Price { get; set; }
+    public string Description { get; set; }
+    public string Category { get; set; }
+    public string ImageUrl { get; set; }
+}
+
+public class ProductDTO
+{
+
+    public string ProductName { get; set; }
+    public decimal Price { get; set; }
+    public string ProductDescription { get; set; }
+    public string Category { get; set; }
+    public string ImageUrl { get; set; }
+}
+
+
+public class ProductProfile : Profile
+{
+  public ProductProfile()
+  {
+      CreateMap<Product, ProductDTO>()
+          .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Name))
+          .ForMember(dest => dest.ProductDescription, opt => opt.MapFrom(src => src.Description));
+
+  }
+}
+
+7️⃣ Add Pagination & Filtering
+
+ public interface IProductService
+ {
+     Task<IEnumerable<Product>> GetAllAsync();
+ }
+
+public class ProductService
+{
+    public List<Product> Products { get; set; }
+
+    public ProductService() {
+
+        Products = new List<Product>()
+        {
+            new Product { Id = 1, Name = "Product 1", Price = 10.99m, Description = "Description 1", Category = "Category 1", ImageUrl = "http://example.com/image1.jpg" },
+            new Product { Id = 2, Name = "Product 2", Price = 20.99m, Description = "Description 2", Category = "Category 2", ImageUrl = "http://example.com/image2.jpg" },
+            new Product { Id = 3, Name = "Product 3", Price = 30.99m, Description = "Description 3", Category = "Category 3", ImageUrl = "http://example.com/image3.jpg" },
+
+        };
+    }
+
+    public async Task<IEnumerable<Product>> GetAllAsync()
+    {
+        return  Products.ToList();
+    }
+}
+
+
+
+[HttpGet("paged")]
+public async Task<IActionResult> GetPaged([FromQuery] int page = 1, [FromQuery] int size = 10)
+{
+    var data = await _service.GetAllAsync();
+    var paged = data.Skip((page - 1) * size).Take(size);
+    return Ok(paged);
+}
+
+8️⃣ Add Unit Testing with xUnit and Moq
+dotnet new xunit -n ProductApi.Tests
+dotnet add ProductApi.Tests reference ProductApi
+dotnet add ProductApi.Tests package Moq
+
+Sample test:
+
+public class ProductsControllerTests
+{
+    [Fact]
+    public async Task GetAll_ReturnsOkResult_WithListOfProducts()
+    {
+        var mockService = new Mock<IProductService>();
+        mockService.Setup(s => s.GetAllAsync()).ReturnsAsync(new List<Product>());
+        var controller = new ProductsController(mockService.Object, new Mock<IMapper>().Object);
+
+        var result = await controller.GetAll();
+        Assert.IsType<OkObjectResult>(result);
+    }
+}
+
+✅ Best Practices Summary Table
+Area	                                Best Practice
+Routing	                              api/v1/products/{id}
+DTOs	                                Always use DTOs
+Model Validation	                    Use [Required], check ModelState.IsValid
+Status Codes	                        200 OK, 201 Created, 400 BadRequest, 404 NotFound, 500 InternalServerError
+DI	                                  Register services using interfaces
+Global Exception Handling	            Use middleware
+Logging	                              Use Serilog with structured output
+Security	                            JWT Bearer Auth
+Versioning	                          Via routes or headers
+Documentation	                        Use Swagger with token support
