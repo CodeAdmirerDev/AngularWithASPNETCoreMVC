@@ -39,7 +39,9 @@ public class AppDbContext : DbContext
     public DbSet<Student> Students { get; set; }
 }
 
-✅ Step 5: Configure SQLite in Program.cs
+✅ Step 5: Configure SQLite & Swagger in Program.cs
+
+dotnet add package Swashbuckle.AspNetCore
 // Program.cs
 using EFCoreSQLiteWebAPI.Data;
 using Microsoft.EntityFrameworkCore;
@@ -70,6 +72,10 @@ app.Run();
 }
 
 ✅ Step 7: Create Migrations & Update Database
+
+Run the below commands in PM console under the tools menu:
+Install-Package Microsoft.EntityFrameworkCore.Tools
+
 dotnet ef migrations add InitialCreate
 dotnet ef database update
 
@@ -137,12 +143,26 @@ dotnet ef database update
 
 ✅ Seeding Data with HasData()
 
-protected override void OnModelCreating(ModelBuilder modelBuilder)
-{
-    modelBuilder.Entity<Student>().HasData(
-        new Student { Id = 1, Name = "Suri", Course = "EF Core" }
-    );
-}
+   public DbSet<Teacher> Teachers { get; set; }
+        public DbSet<Student> Students { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            // Seed Teachers
+            modelBuilder.Entity<Teacher>().HasData(
+                new Teacher { Id = 1, Name = "Monica Sharma" },
+                new Teacher { Id = 2, Name = "Ravi Kumar" }
+            );
+
+            // Seed Students
+            modelBuilder.Entity<Student>().HasData(
+                new Student { Id = 1, Name = "Arjun Reddy", Course = "Math", TeacherId = 1 },
+                new Student { Id = 2, Name = "Priya Mehta", Course = "Science", TeacherId = 1 },
+                new Student { Id = 3, Name = "Rahul Jain", Course = "History", TeacherId = 2 }
+            );
+        }
+
+
 
 ✅ Dependency Injection (already done with AddDbContext)
 You can now inject AppDbContext into any controller or service.
