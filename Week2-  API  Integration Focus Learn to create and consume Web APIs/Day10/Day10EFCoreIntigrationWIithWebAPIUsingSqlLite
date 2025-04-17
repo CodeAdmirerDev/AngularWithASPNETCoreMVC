@@ -1,0 +1,386 @@
+Let's now focus on Day 10: EF Core Integration with ASP.NET Core Web API using the Code First approach, SQLite, and Migrations. This guide will take you from beginner to expert, including best practices and a complete step-by-step walkthrough. 💪
+
+🔰 Beginner Level: EF Core + Web API + SQLite Integration
+
+✅ Step 1: Create ASP.NET Core Web API Project
+dotnet new webapi -n EFCoreSQLiteWebAPI
+cd EFCoreSQLiteWebAPI
+
+✅ Step 2: Add Required NuGet Packages
+dotnet add package Microsoft.EntityFrameworkCore.Sqlite
+dotnet add package Microsoft.EntityFrameworkCore.Design
+
+✅ Step 3: Create the Model
+
+// Models/Student.cs
+namespace EFCoreSQLiteWebAPI.Models;
+
+public class Student
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public string Course { get; set; }
+}
+
+✅ Step 4: Create the DbContext
+// Data/AppDbContext.cs
+using Microsoft.EntityFrameworkCore;
+using EFCoreSQLiteWebAPI.Models;
+
+namespace EFCoreSQLiteWebAPI.Data;
+
+public class AppDbContext : DbContext
+{
+    public AppDbContext(DbContextOptions<AppDbContext> options)
+        : base(options)
+    {
+    }
+
+    public DbSet<Student> Students { get; set; }
+}
+
+✅ Step 5: Configure SQLite in Program.cs
+// Program.cs
+using EFCoreSQLiteWebAPI.Data;
+using Microsoft.EntityFrameworkCore;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add SQLite with EF Core
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("Default")));
+
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+var app = builder.Build();
+app.UseSwagger();
+app.UseSwaggerUI();
+app.UseHttpsRedirection();
+app.UseAuthorization();
+app.MapControllers();
+app.Run();
+
+✅ Step 6: Add Connection String
+
+// appsettings.json
+"ConnectionStrings": {
+  "Default": "Data Source=students.db"
+}
+
+✅ Step 7: Create Migrations & Update Database
+dotnet ef migrations add InitialCreate
+dotnet ef database update
+
+👉 This creates the SQLite DB (students.db) in your root directory.
+
+🛠️ Step 8: Create API Controller
+
+// Controllers/StudentsController.cs
+using Microsoft.AspNetCore.Mvc;
+using EFCoreSQLiteWebAPI.Data;
+using EFCoreSQLiteWebAPI.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace EFCoreSQLiteWebAPI.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class StudentsController : ControllerBase
+{
+    private readonly AppDbContext _context;
+
+    public StudentsController(AppDbContext context)
+    {
+        _context = context;
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<Student>>> GetStudents()
+    {
+        return await _context.Students.ToListAsync();
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<Student>> PostStudent(Student student)
+    {
+        _context.Students.Add(student);
+        await _context.SaveChangesAsync();
+        return CreatedAtAction(nameof(GetStudents), new { id = student.Id }, student);
+    }
+}
+
+🧗 Intermediate Level: Expanding EF Core Capabilities
+
+✅ Add Relationships
+
+public class Teacher
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public List<Student> Students { get; set; }
+}
+
+public class Student
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public string Course { get; set; }
+
+    public int TeacherId { get; set; }
+    public Teacher Teacher { get; set; }
+}
+
+dotnet ef migrations add AddTeacher
+dotnet ef database update
+
+✅ Seeding Data with HasData()
+
+protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+    modelBuilder.Entity<Student>().HasData(
+        new Student { Id = 1, Name = "Suri", Course = "EF Core" }
+    );
+}
+
+✅ Dependency Injection (already done with AddDbContext)
+You can now inject AppDbContext into any controller or service.
+
+🧠 Advanced Level: Best Practices + Expert Tips
+
+Area	              Best Practice
+DbContext	          Register with scoped lifetime in DI container.
+Migrations        	Keep under version control. Don’t delete old ones.
+Seeding	            Use HasData() for default values.
+DbSet Naming	      Use plural for DbSet, singular for classes.
+Transaction Safety	Use SaveChangesAsync() after all operations.
+
+Logging	Enable SQL logging for debugging:
+options.UseSqlite(...).LogTo(Console.WriteLine, LogLevel.Information);
+| Validation | Use DataAnnotations or FluentValidation for API models. | | Exception Handling | Add global exception middleware. | | DTO Pattern | Use DTOs to separate EF models from API contracts. | | Soft Delete | Implement IsDeleted property and filter in OnModelCreating(). |
+
+✅ Testing the API with Swagger
+Run the project and open:
+
+https://localhost:<port>/swagger
+Try out:
+
+POST /api/students
+GET /api/students
+
+🔁 Bonus Tips for Growing into Expert
+Create generic repository and unit of work patterns.
+Implement AutoMapper to convert between DTOs and EF models.
+Apply Global Exception Handling middleware.
+Add logging using Serilog.
+
+🧪 Want Practice?
+Build a Student-Teacher CRUD system with:
+Filtering by course
+Sorting by name
+Paging using Skip/Take
+Logging and exception middleware
+
+
+Here's your mini project: Student–Teacher CRUD System using ASP.NET Core Web API, EF Core (Code First), and SQLite.
+
+🎯 Project Overview
+You’ll build a Web API that manages:
+
+🧑‍🎓 Students
+👨‍🏫 Teachers
+
+Relationship: One Teacher can have many Students (1:N)
+
+📂 Project Structure
+
+EFCoreSQLiteWebAPI/
+│
+├── Controllers/
+│   ├── StudentsController.cs
+│   └── TeachersController.cs
+│
+├── Data/
+│   └── AppDbContext.cs
+│
+├── Models/
+│   ├── Student.cs
+│   └── Teacher.cs
+│
+├── DTOs/
+│   ├── StudentDto.cs
+│   └── TeacherDto.cs
+│
+├── Program.cs
+├── appsettings.json
+└── EF Migrations...
+
+🔨 Step-by-Step Implementation
+
+✅ Step 1: Create Models
+
+// Models/Teacher.cs
+namespace EFCoreSQLiteWebAPI.Models;
+
+public class Teacher
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+
+    public List<Student> Students { get; set; } = new();
+}
+
+// Models/Student.cs
+namespace EFCoreSQLiteWebAPI.Models;
+
+public class Student
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public string Course { get; set; }
+
+    public int TeacherId { get; set; }
+    public Teacher Teacher { get; set; }
+}
+
+✅ Step 2: DbContext Configuration
+
+// Data/AppDbContext.cs
+using Microsoft.EntityFrameworkCore;
+using EFCoreSQLiteWebAPI.Models;
+
+namespace EFCoreSQLiteWebAPI.Data;
+
+public class AppDbContext : DbContext
+{
+    public AppDbContext(DbContextOptions<AppDbContext> options)
+        : base(options) {}
+
+    public DbSet<Teacher> Teachers { get; set; }
+    public DbSet<Student> Students { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Teacher>().HasData(
+            new Teacher { Id = 1, Name = "Monica Teacher" }
+        );
+    }
+}
+
+✅ Step 3: Add Migration and Update Database
+
+dotnet ef migrations add InitStudentTeacher
+dotnet ef database update
+
+✅ Step 4: Create DTOs (optional but recommended)
+
+// DTOs/StudentDto.cs
+public class StudentDto
+{
+    public string Name { get; set; }
+    public string Course { get; set; }
+    public int TeacherId { get; set; }
+}
+
+// DTOs/TeacherDto.cs
+public class TeacherDto
+{
+    public string Name { get; set; }
+}
+✅ Step 5: TeachersController
+
+// Controllers/TeachersController.cs
+using Microsoft.AspNetCore.Mvc;
+using EFCoreSQLiteWebAPI.Data;
+using EFCoreSQLiteWebAPI.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace EFCoreSQLiteWebAPI.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class TeachersController : ControllerBase
+{
+    private readonly AppDbContext _context;
+    public TeachersController(AppDbContext context) => _context = context;
+
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<Teacher>>> GetAll()
+        => await _context.Teachers.Include(t => t.Students).ToListAsync();
+
+    [HttpPost]
+    public async Task<ActionResult<Teacher>> Create(Teacher teacher)
+    {
+        _context.Teachers.Add(teacher);
+        await _context.SaveChangesAsync();
+        return CreatedAtAction(nameof(GetAll), new { id = teacher.Id }, teacher);
+    }
+}
+
+✅ Step 6: StudentsController
+
+// Controllers/StudentsController.cs
+using Microsoft.AspNetCore.Mvc;
+using EFCoreSQLiteWebAPI.Data;
+using EFCoreSQLiteWebAPI.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace EFCoreSQLiteWebAPI.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class StudentsController : ControllerBase
+{
+    private readonly AppDbContext _context;
+    public StudentsController(AppDbContext context) => _context = context;
+
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<Student>>> GetAll()
+        => await _context.Students.Include(s => s.Teacher).ToListAsync();
+
+    [HttpPost]
+    public async Task<ActionResult<Student>> Create(Student student)
+    {
+        _context.Students.Add(student);
+        await _context.SaveChangesAsync();
+        return CreatedAtAction(nameof(GetAll), new { id = student.Id }, student);
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(int id, Student student)
+    {
+        if (id != student.Id) return BadRequest();
+        _context.Entry(student).State = EntityState.Modified;
+        await _context.SaveChangesAsync();
+        return NoContent();
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var student = await _context.Students.FindAsync(id);
+        if (student == null) return NotFound();
+        _context.Students.Remove(student);
+        await _context.SaveChangesAsync();
+        return NoContent();
+    }
+}
+
+✅ Step 7: Swagger UI Testing
+Run the app and open:
+
+https://localhost:<port>/swagger
+
+You can test:
+GET/POST /api/teachers
+GET/POST/PUT/DELETE /api/students
+
+🧠 Suggested Enhancements (Expert Practice)
+✅ Use AutoMapper to convert DTOs ⇄ Models
+✅ Add Pagination: ?page=1&pageSize=10
+✅ Add Search: by course or name
+✅ Add Sorting: ASC/DESC by name
+✅ Implement Soft Delete: IsDeleted field
+✅ Add Global Exception Handling Middleware
+✅ Use Serilog for logging
