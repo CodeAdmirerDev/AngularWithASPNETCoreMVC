@@ -1,3 +1,5 @@
+using PostAPI.Repositories;
+
 namespace PostAPI
 {
     public class Program
@@ -10,8 +12,16 @@ namespace PostAPI
 
             builder.Services.AddControllers();
 
+            builder.Services.AddSingleton<PostRepositrory>();
+            builder.Services.AddSwaggerGen();
+
             var app = builder.Build();
 
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
             // Configure the HTTP request pipeline.
 
             app.UseHttpsRedirection();
