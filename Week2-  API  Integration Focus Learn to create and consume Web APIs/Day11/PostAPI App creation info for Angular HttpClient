@@ -1,0 +1,189 @@
+A simple ASP.NET Core Web API backend for Post related functionality (CRUD operations). 
+This example uses in-memory storage for simplicity but can be easily extended to use a database like Entity Framework Core.
+
+ASP.NET Core Web API: Post Controller Example
+
+1. Create a new ASP.NET Core Web API project
+dotnet new webapi -n PostApi  
+cd PostApi  
+
+2. Define Post model (Models/Post.cs)
+
+namespace PostApi.Models  
+{  
+    public class Post  
+    {  
+        public int Id { get; set; }          // Primary key  
+        public string Title { get; set; }  
+        public string Body { get; set; }  
+        public int UserId { get; set; }  
+    }  
+}  
+
+3. Create Repository for in-memory Post storage (Repositories/PostRepository.cs)
+
+using PostApi.Models;  
+using System.Collections.Generic;  
+using System.Linq;  
+
+namespace PostApi.Repositories  
+{  
+    public class PostRepository  
+    {  
+        private readonly List<Post> _posts = new();  
+        private int _nextId = 1;  
+
+        public PostRepository()  
+        {  
+            // Seed initial data  
+            _posts.Add(new Post { Id = _nextId++, Title = "Hello World", Body = "First post", UserId = 1 });  
+        }  
+
+        public IEnumerable<Post> GetAll() => _posts;  
+
+        public Post GetById(int id) => _posts.FirstOrDefault(p => p.Id == id);  
+
+        public Post Create(Post post)  
+        {  
+            post.Id = _nextId++;  
+            _posts.Add(post);  
+            return post;  
+        }  
+
+        public bool Update(Post post)  
+        {  
+            var existing = GetById(post.Id);  
+            if (existing == null) return false;  
+
+            existing.Title = post.Title;  
+            existing.Body = post.Body;  
+            existing.UserId = post.UserId;  
+            return true;  
+        }  
+
+        public bool Delete(int id)  
+        {  
+            var post = GetById(id);  
+            if (post == null) return false;  
+            return _posts.Remove(post);  
+        }  
+    }  
+}  
+
+4. Register Repository as a Singleton Service
+Modify Program.cs (or Startup.cs for earlier versions):
+
+using PostApi.Repositories;  
+
+var builder = WebApplication.CreateBuilder(args);  
+
+// Add services to the container.  
+builder.Services.AddSingleton<PostRepository>();  // Register repository  
+builder.Services.AddControllers();  
+builder.Services.AddEndpointsApiExplorer();  
+builder.Services.AddSwaggerGen();  
+
+var app = builder.Build();  
+
+if (app.Environment.IsDevelopment())  
+{  
+    app.UseSwagger();  
+    app.UseSwaggerUI();  
+}  
+
+app.UseHttpsRedirection();  
+app.UseAuthorization();  
+app.MapControllers();  
+
+app.Run();  
+
+5. Create Posts API Controller (Controllers/PostsController.cs)
+
+using Microsoft.AspNetCore.Mvc;  
+using PostApi.Models;  
+using PostApi.Repositories;  
+
+namespace PostApi.Controllers  
+{  
+    [ApiController]  
+    [Route("api/[controller]")]  
+    public class PostsController : ControllerBase  
+    {  
+        private readonly PostRepository _repository;  
+
+        public PostsController(PostRepository repository)  
+        {  
+            _repository = repository;  
+        }  
+
+        // GET: api/posts  
+        [HttpGet]  
+        public ActionResult<IEnumerable<Post>> GetAll()  
+        {  
+            return Ok(_repository.GetAll());  
+        }  
+
+        // GET: api/posts/5  
+        [HttpGet("{id}")]  
+        public ActionResult<Post> GetById(int id)  
+        {  
+            var post = _repository.GetById(id);  
+            if (post == null)  
+                return NotFound();  
+
+            return Ok(post);  
+        }  
+
+        // POST: api/posts  
+        [HttpPost]  
+        public ActionResult<Post> Create(Post post)  
+        {  
+            if (post == null)  
+                return BadRequest();  
+
+            var createdPost = _repository.Create(post);  
+            return CreatedAtAction(nameof(GetById), new { id = createdPost.Id }, createdPost);  
+        }  
+
+        // PUT: api/posts/5  
+        [HttpPut("{id}")]  
+        public IActionResult Update(int id, Post post)  
+        {  
+            if (post == null || post.Id != id)  
+                return BadRequest();  
+
+            var success = _repository.Update(post);  
+            if (!success)  
+                return NotFound();  
+
+            return NoContent();  
+        }  
+
+        // DELETE: api/posts/5  
+        [HttpDelete("{id}")]  
+        public IActionResult Delete(int id)  
+        {  
+            var success = _repository.Delete(id);  
+            if (!success)  
+                return NotFound();  
+
+            return NoContent();  
+        }  
+    }  
+}  
+
+6. Run and Test
+
+Run your project: dotnet run
+
+Navigate to https://localhost:{port}/swagger to test API via Swagger UI.
+Or use Postman / Curl to issue HTTP requests.
+
+Summary of API Endpoints
+
+Method	      URL	Description
+GET	          /api/posts	Get all posts
+GET	          /api/posts/{id}	Get post by ID
+POST	        /api/posts	Create new post
+PUT	          /api/posts/{id}	Update post by ID
+DELETE	      /api/posts/{id}	Delete post by ID
