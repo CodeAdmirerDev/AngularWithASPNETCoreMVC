@@ -15,6 +15,19 @@ namespace PostAPI
             builder.Services.AddSingleton<PostRepositrory>();
             builder.Services.AddSwaggerGen();
 
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAngularApp",
+                    policy =>
+                    {
+                        policy.WithOrigins("http://localhost:4200")
+                              .AllowAnyHeader()
+                              .AllowAnyMethod();
+                    });
+            });
+
+
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())
@@ -28,7 +41,7 @@ namespace PostAPI
 
             app.UseAuthorization();
 
-
+            app.UseCors("AllowAngularApp");
             app.MapControllers();
 
             app.Run();
