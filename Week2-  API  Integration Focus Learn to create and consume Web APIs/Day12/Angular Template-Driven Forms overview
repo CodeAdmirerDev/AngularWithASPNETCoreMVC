@@ -199,7 +199,11 @@ export class AppComponent {
   }  
 
   onSubmit(form: any) {  
-    console.log('Form submitted with:', form.value);  
+ alert('form data saved!');
+    this.userName = '';  
+    this.email = '';  
+    this.age = null;  
+    this.phones = [''];  
   }  
 
   onReset(form: any) {  
@@ -212,113 +216,115 @@ export class AppComponent {
 }  
 
 3. app.component.html
+
 <form #myForm="ngForm" (ngSubmit)="onSubmit(myForm)" novalidate>  
 
-  <!-- Step 1 & 2: Username with validation -->  
-  <label>Username:</label>  
-  <input   
-    type="text"   
-    name="userName"   
-    [(ngModel)]="userName"   
-    noSpaces   
-    required   
-    minlength="3"   
-    #userNameField="ngModel" />  
-  
-  <div *ngIf="userNameField.invalid && (userNameField.dirty || userNameField.touched)">  
-    <small *ngIf="userNameField.errors?.required">Username is required.</small>  
-    <small *ngIf="userNameField.errors?.minlength">Username must be at least 3 characters.</small>  
-    <small *ngIf="userNameField.errors?.noSpaces">No spaces allowed in username.</small>  
-  </div>  
-  
-  <br />  
-
-  <!-- Step 3: Email with validation and form control states -->  
-  <label>Email:</label>  
-  <input   
-    type="email"   
-    name="email"   
-    [(ngModel)]="email"   
-    required   
-    email   
-    #emailField="ngModel" />  
-  
-  <div *ngIf="emailField.invalid && (emailField.dirty || emailField.touched)">  
-    <small *ngIf="emailField.errors?.required">Email is required.</small>  
-    <small *ngIf="emailField.errors?.email">Invalid email format.</small>  
-  </div>  
-  <p>  
-    Status:   
-    Pristine: {{emailField.pristine}},   
-    Dirty: {{emailField.dirty}},   
-    Touched: {{emailField.touched}}  
-  </p>  
-
-  <br />  
-
-  <!-- Step 4: Nested address group -->  
-  <ngModelGroup name="address">  
-    <label>Street:</label>  
+    <!-- Step 1 & 2: Username with validation -->  
+    <label>Username:</label>  
     <input   
       type="text"   
-      name="street"   
-      ngModel  
-      required  
-      #streetField="ngModel" />  
+      name="userName"   
+      [(ngModel)]="userName"   
+      noSpaces   
+      required   
+      minlength="3"   
+      #userNameField="ngModel" />  
     
-    <div *ngIf="streetField.invalid && (streetField.dirty || streetField.touched)">  
-      <small *ngIf="streetField.errors?.required">Street is required.</small>  
+    <div *ngIf="userNameField.invalid && (userNameField.dirty || userNameField.touched)">  
+      <small *ngIf="userNameField.errors?.['required']">Username is required.</small>  
+      <small *ngIf="userNameField.errors?.['minlength']">Username must be at least 3 characters.</small>  
+      <small *ngIf="userNameField.errors?.['noSpaces']">No spaces allowed in username.</small>  
     </div>  
-
-    <label>City:</label>  
-    <input type="text" name="city" ngModel />  
-  </ngModelGroup>  
-
-  <br />  
-
-  <!-- Age input with min/max validation -->  
-  <label>Age:</label>  
-  <input   
-    type="number"   
-    name="age"   
-    [(ngModel)]="age"   
-    min="18"   
-    max="99"  
-    #ageField="ngModel" />  
+    
+    <br />  
   
-  <div *ngIf="ageField.invalid && (ageField.dirty || ageField.touched)">  
-    <small *ngIf="ageField.errors?.min">Age must be at least 18.</small>  
-    <small *ngIf="ageField.errors?.max">Age cannot exceed 99.</small>  
-  </div>  
-
-  <br />  
-
-  <!-- Step 7: Dynamic phone numbers -->  
-  <div *ngFor="let phone of phones; let i = index">  
-    <label>Phone {{i + 1}}:</label>  
+    <!-- Step 3: Email with validation and form control states -->  
+    <label>Email:</label>  
     <input   
-      type="text"   
-      name="phone{{i}}"   
-      [(ngModel)]="phones[i]"   
-      required  
-      #phoneField="ngModel" />  
-
-    <button type="button" (click)="removePhone(i)" *ngIf="phones.length > 1">Remove</button>  
-
-    <div *ngIf="phoneField.invalid && (phoneField.dirty || phoneField.touched)">  
-      <small *ngIf="phoneField.errors?.required">Phone number is required.</small>  
+      type="email"   
+      name="email"   
+      [(ngModel)]="email"   
+      required   
+      email   
+      #emailField="ngModel" />  
+    
+    <div *ngIf="emailField.invalid && (emailField.dirty || emailField.touched)">  
+      <small *ngIf="emailField.errors?.['required']">Email is required.</small>  
+      <small *ngIf="emailField.errors?.['email']">Invalid email format.</small>  
     </div>  
-  </div>  
-
-  <button type="button" (click)="addPhone()">Add Phone</button>  
-
-  <br /><br />  
-
-  <!-- Submit & Reset -->  
-  <button type="submit" [disabled]="myForm.invalid">Submit</button>  
-  <button type="button" (click)="onReset(myForm)">Reset</button>  
-
-</form>  
+    <p>  
+      Status:   
+      Pristine: {{emailField.pristine}},   
+      Dirty: {{emailField.dirty}},   
+      Touched: {{emailField.touched}}  
+    </p>  
+  
+    <br />  
+  
+    <!-- Step 4: Nested address group -->  
+    <div ngModelGroup name="address">  
+      <label>Street:</label>  
+      <input   
+        type="text"   
+        name="street"   
+        ngModel  
+        required  
+        #streetField="ngModel" />  
+      
+      <div *ngIf="streetField.invalid && (streetField.dirty || streetField.touched)">  
+        <small *ngIf="streetField.errors?.['required']">Street is required.</small>  
+      </div>  
+  
+      <label>City:</label>  
+      <input type="text" name="city" ngModel />  
+    </div>  
+  
+    <br />  
+  
+    <!-- Age input with min/max validation -->  
+    <label>Age:</label>  
+    <input   
+      type="number"   
+      name="age"   
+      [(ngModel)]="age"   
+      min="18"   
+      max="99"  
+      #ageField="ngModel" />  
+    
+    <div *ngIf="ageField.invalid && (ageField.dirty || ageField.touched)">  
+      <small *ngIf="ageField.errors?.['min']">Age must be at least 18.</small>  
+      <small *ngIf="ageField.errors?.['max']">Age cannot exceed 99.</small>  
+    </div>  
+  
+    <br />  
+  
+    <!-- Step 7: Dynamic phone numbers -->  
+    <div *ngFor="let phone of phones; let i = index">  
+      <label>Phone {{i + 1}}:</label>  
+      <input   
+        type="text"   
+        name="phone{{i}}"   
+        [(ngModel)]="phones[i]"   
+        required  
+        #phoneField="ngModel" />  
+  
+      <button type="button" (click)="removePhone(i)" *ngIf="phones.length > 1">Remove</button>  
+  
+      <div *ngIf="phoneField.invalid && (phoneField.dirty || phoneField.touched)">  
+        <small *ngIf="phoneField.errors?.['required']">Phone number is required.</small>  
+      </div>  
+    </div>  
+  
+    <button type="button" (click)="addPhone()">Add Phone</button>  
+  
+    <br /><br />  
+  
+    <!-- Submit & Reset -->  
+    <button type="submit" [disabled]="myForm.invalid">Submit</button>  
+    <button type="button" (click)="onReset(myForm)">Reset</button>  
+  
+  </form>  
+  
 
 4. no-spaces.validator.ts (Custom validator directive)
 import { Directive } from '@angular/core';  
