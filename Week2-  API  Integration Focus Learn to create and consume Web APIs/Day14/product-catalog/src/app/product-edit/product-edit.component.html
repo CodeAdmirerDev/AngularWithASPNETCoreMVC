@@ -1,0 +1,28 @@
+<h2>{{ isEditMode ? 'Edit Product' : 'Create Product' }}</h2>  
+
+<form [formGroup]="productForm" (ngSubmit)="onSubmit()">  
+
+  <label>  
+    Name:  
+    <input formControlName="name" />  
+  </label>  
+  <div *ngIf="productForm.controls['name'].invalid && productForm.controls['name'].touched">  
+    Name is required  
+  </div>  
+
+  <label>  
+    Price:  
+    <input type="number" formControlName="price" />  
+  </label>  
+  <div *ngIf="productForm.controls['price'].invalid && productForm.controls['price'].touched">  
+    Price must be positive  
+  </div>  
+
+  <label>  
+    Description:  
+    <textarea formControlName="description"></textarea>  
+  </label>  
+
+  <button type="submit" [disabled]="productForm.invalid">{{ isEditMode ? 'Update' : 'Create' }}</button>  
+  <button type="button" (click)="cancel()">Cancel</button>  
+</form>  

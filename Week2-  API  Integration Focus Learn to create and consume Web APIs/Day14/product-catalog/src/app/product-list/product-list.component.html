@@ -1,0 +1,33 @@
+<h2>Product List</h2>  
+
+<ul>  
+  <li *ngFor="let product of products">  
+    {{product.name}} - ${{product.price | number:'1.2-2'}}  
+    <button (click)="deleteProduct(product.id!)">Delete</button>  
+    <button [routerLink]="['/products/edit', product.id]">Edit</button>  
+  </li>  
+</ul>  
+
+<h3>Add New Product (Template-Driven Form)</h3>  
+<form #productForm="ngForm" (ngSubmit)="addProduct(productForm)">  
+  
+  <label>  
+    Name:  
+    <input name="name" ngModel required />  
+  </label>  
+  <br>  
+  
+  <label>  
+    Price:  
+    <input name="price" type="number" ngModel required min="0" />  
+  </label>  
+  <br>  
+
+  <label>  
+    Description:  
+    <textarea name="description" ngModel></textarea>  
+  </label>  
+  <br>  
+
+  <button type="submit" [disabled]="productForm.invalid">Add Product</button>  
+</form>  
