@@ -1,0 +1,26 @@
+<div class="task-dashboard">  
+    <h2>Task Manager Dashboard</h2>  
+  
+  <!-- Add template reference variable -->  
+  <input  
+  #taskInput  
+  type="text"  
+  placeholder="Add new task"  
+  [(ngModel)]="taskTitle"  
+  (keyup.enter)="addTaskAndReset(taskInput)"  
+  aria-label="Task Title"  
+  />  
+  <button (click)="addTaskAndReset(taskInput)">Add Task</button>  
+  
+    <ul>  
+      <li *ngFor="let task of tasks">  
+        <app-task-item  
+          [task]="task"  
+          (statusChanged)="updateTaskStatus($event.taskId, $event.completed)"  
+        ></app-task-item>  
+      </li>  
+    </ul>  
+  
+    <app-statistics-panel [tasks]="tasks"></app-statistics-panel>  
+  </div>  
+
