@@ -112,10 +112,26 @@ Full CRUD with API integration
 Focus: Advanced Angular & ASP.NET Core features
 
 Day 15: Component Communication
-
 @Input, @Output, EventEmitter
-
 ViewChild example
+
+ Angular Lifecycle Hooks
+
+🔹 What is a lifecycle hook?
+🔹 When and why each hook fires:
+ngOnInit, ngOnChanges, ngDoCheck
+ngAfterContentInit, ngAfterViewInit, ngOnDestroy, etc.
+
+🔹 Real-time use cases:
+Fetching data
+Cleaning up subscriptions
+DOM access with ViewChild
+
+🔹 Mini practice task:
+Use hooks in a component, console log each one
+Add/Remove dynamic child component and track destruction
+
+🔹 Interview tips & common questions
 
 Day 16: Angular Directives
 
