@@ -27,8 +27,8 @@ Step-by-step process for Real-time Example
 Step 1: Setup Angular App & SSR Environment
 
 Run:
-ng new angular-comm-project --routing --style=scss  
-cd angular-comm-project  
+ng new task-manager-project --routing --style=scss  
+cd task-manager-project  
 ng add @nguniversal/express-engine  
 
 This sets up Angular 19 app with routing and SSR using Express.
@@ -278,7 +278,7 @@ import { FormsModule } from '@angular/forms';
 export class AppModule {}  
 
 Step 10: Run and Test the Real-Time Task Manager App
-npm run dev:ssr  
+ng serve
 
 Visit http://localhost:4200,
   Add tasks.
