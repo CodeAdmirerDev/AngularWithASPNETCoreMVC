@@ -191,10 +191,12 @@ import { ChildComponent } from './child.component';
 @Component({  
   selector: 'app-root',  
   template: `  
-    <h1>Angular Lifecycle Hooks Demo</h1>  
-    <button (click)="createChild()" [disabled]="childRef">Create Child</button>  
-    <button (click)="destroyChild()" [disabled]="!childRef">Destroy Child</button>  
-    <ng-template #container></ng-template>  
+    <h1>Angular LifeCycle hooks Demo </h1>
+  <button (click)="createChild()" [disabled]="childRef"> Create Child</button>
+  <button (click)="destroyChild()" [disabled]="!childRef"> Destroy Child</button>
+  <ng-template #container></ng-template>
+  <input type="text" [(ngModel)]="title"/>
+  <app-child-component [inputData]="title" ></app-child-component>
   `  
 })  
 export class AppComponent {  
