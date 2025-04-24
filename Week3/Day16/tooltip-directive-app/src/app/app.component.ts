@@ -3,9 +3,27 @@ import { Component } from '@angular/core';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  standalone: false,
-  styleUrl: './app.component.css'
+  styleUrls: ['./app.component.css'],
+  standalone:false
 })
 export class AppComponent {
-  title = 'tooltip-directive-app';
+  items = ['Angular', 'React', 'Vue'];
+  newItem = '';
+  isAdmin = true;
+  viewMode = 'list';
+
+  addItem() {
+    if (this.newItem.trim()) {
+      this.items.push(this.newItem.trim());
+      this.newItem = '';
+    }
+  }
+
+  toggleView() {
+    this.viewMode = this.viewMode === 'list' ? 'grid' : 'list';
+  }
+
+  toggleRole() {
+    this.isAdmin = !this.isAdmin;
+  }
 }
