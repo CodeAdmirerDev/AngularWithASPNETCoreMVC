@@ -1,0 +1,177 @@
+Let's build a complete Angular 19 (non-standalone) mini project:
+
+🧪 Custom Tooltip Directive
+We'll also demonstrate all major built-in directives (*ngIf, *ngFor, *ngSwitch, ngClass, ngStyle, ngModel) inside this project.
+
+🎯 Project Overview
+
+A simple app that shows a list of items.
+Each item shows a tooltip (custom directive) when hovered.
+A form allows you to add items using ngModel.
+Conditional views using *ngIf and *ngSwitch.
+
+
+📁 Project Structure
+src/
+├── app/
+│   ├── app.component.ts/html/css
+│   ├── tooltip.directive.ts  ✅ (Custom Directive)
+│   └── app.module.ts
+
+1️⃣ tooltip.directive.ts (Custom Attribute Directive)
+
+import { Directive, ElementRef, Input, HostListener, Renderer2 } from '@angular/core';
+
+@Directive({
+  selector: '[appTooltip]'
+})
+export class TooltipDirective {
+  @Input('appTooltip') tooltipText = '';
+  tooltipElement!: HTMLElement;
+
+  constructor(private el: ElementRef, private renderer: Renderer2) {}
+
+  @HostListener('mouseenter') onMouseEnter() {
+    this.tooltipElement = this.renderer.createElement('span');
+    this.tooltipElement.innerHTML = this.tooltipText;
+    this.renderer.setStyle(this.tooltipElement, 'position', 'absolute');
+    this.renderer.setStyle(this.tooltipElement, 'background', '#333');
+    this.renderer.setStyle(this.tooltipElement, 'color', '#fff');
+    this.renderer.setStyle(this.tooltipElement, 'padding', '4px 8px');
+    this.renderer.setStyle(this.tooltipElement, 'border-radius', '4px');
+    this.renderer.setStyle(this.tooltipElement, 'top', '100%');
+    this.renderer.setStyle(this.tooltipElement, 'left', '0');
+    this.renderer.setStyle(this.tooltipElement, 'white-space', 'nowrap');
+    this.renderer.setStyle(this.tooltipElement, 'z-index', '1000');
+    this.renderer.appendChild(this.el.nativeElement, this.tooltipElement);
+  }
+
+  @HostListener('mouseleave') onMouseLeave() {
+    if (this.tooltipElement) {
+      this.renderer.removeChild(this.el.nativeElement, this.tooltipElement);
+    }
+  }
+}
+
+2️⃣ app.component.ts
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css']
+})
+export class AppComponent {
+  items = ['Angular', 'React', 'Vue'];
+  newItem = '';
+  isAdmin = true;
+  viewMode = 'list';
+
+  addItem() {
+    if (this.newItem.trim()) {
+      this.items.push(this.newItem.trim());
+      this.newItem = '';
+    }
+  }
+
+  toggleView() {
+    this.viewMode = this.viewMode === 'list' ? 'grid' : 'list';
+  }
+
+  toggleRole() {
+    this.isAdmin = !this.isAdmin;
+  }
+}
+
+3️⃣ app.component.html
+<div class="container">
+  <h1>🧪 Angular Tooltip Project</h1>
+
+  <!-- ngModel + ngStyle + ngClass -->
+  <input [(ngModel)]="newItem"
+         [ngStyle]="{ 'border': newItem.length > 10 ? '2px solid red' : '1px solid gray' }"
+         [ngClass]="{ 'long-text': newItem.length > 10 }"
+         placeholder="Add an item" />
+
+  <button (click)="addItem()">Add</button>
+
+  <!-- *ngIf -->
+  <p *ngIf="items.length === 0">No items found.</p>
+
+  <!-- *ngSwitch -->
+  <div [ngSwitch]="viewMode">
+    <ul *ngSwitchCase="'list'">
+      <li *ngFor="let item of items" [appTooltip]="'Tooltip: ' + item">
+        📌 {{ item }}
+      </li>
+    </ul>
+
+    <div *ngSwitchCase="'grid'" class="grid">
+      <div *ngFor="let item of items" class="card" [appTooltip]="'Tooltip: ' + item">
+        {{ item }}
+      </div>
+    </div>
+
+    <p *ngSwitchDefault>Invalid View</p>
+  </div>
+
+  <!-- Role-based conditional rendering -->
+  <p *ngIf="isAdmin; else userBlock">👑 You are Admin</p>
+  <ng-template #userBlock><p>🙋 You are a User</p></ng-template>
+
+  <button (click)="toggleView()">Toggle View (List/Grid)</button>
+  <button (click)="toggleRole()">Toggle Role</button>
+</div>
+
+4️⃣ app.component.css
+
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+input.long-text {
+  background-color: #fff0f0;
+}
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.card {
+  padding: 10px;
+  background: #eee;
+  border-radius: 4px;
+}
+
+5️⃣ app.module.ts
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { FormsModule } from '@angular/forms';
+
+import { AppComponent } from './app.component';
+import { TooltipDirective } from './tooltip.directive';
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    TooltipDirective
+  ],
+  imports: [
+    BrowserModule,
+    FormsModule
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+
+✅ Built-in Directives Covered:
+
+Directive	Use Case
+*ngIf	Conditionally show user/admin info
+*ngFor	Loop over items
+*ngSwitch	Toggle between list and grid views
+ngClass	Dynamic class for long input values
+ngStyle	Dynamic style for input border
+ngModel	Two-way binding for the new item
