@@ -1,1 +1,10 @@
-<p>task-item works!</p>
+<div [class.completed]="task.completed" class="task-item">  
+    <input  
+      type="checkbox"  
+      [checked]="task.completed"  
+      (change)="toggleStatus()"  
+      aria-label="Toggle task completion"  
+    />  
+    <span>{{ task.title }}</span>  
+  </div>  
+  
