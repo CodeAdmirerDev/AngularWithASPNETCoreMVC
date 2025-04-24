@@ -1,5 +1,7 @@
  Angular + ASP.NET Core MVC – 30 Day Plan
+ 
 ⏱️ Time per day: 2 to 3 hours
+
 🎯 Goal: Become proficient in full-stack development using Angular (frontend) + ASP.NET Core MVC (backend)
 
 🔹 Week 1: Fundamentals & Setup
@@ -109,18 +111,25 @@ Build mini project: Product Catalog
 Full CRUD with API integration
 
 🔹 Week 3: Intermediate Concepts
+
 Focus: Advanced Angular & ASP.NET Core features
 
 Day 15: Component Communication
+
 @Input, @Output, EventEmitter
+
 ViewChild example
 
- Angular Lifecycle Hooks
+Angular Lifecycle Hooks
 
 🔹 What is a lifecycle hook?
+
 🔹 When and why each hook fires:
+
 ngOnInit, ngOnChanges, ngDoCheck
+
 ngAfterContentInit, ngAfterViewInit, ngOnDestroy, etc.
+
 
 🔹 Real-time use cases:
 Fetching data
