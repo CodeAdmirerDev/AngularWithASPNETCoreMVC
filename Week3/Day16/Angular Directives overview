@@ -1,0 +1,125 @@
+Here's your Day 16: Angular Directives roadmap — taking you from beginner to expert with detailed explanations, examples, and best practices.
+
+🚀 Day 16: Angular 19 Directives – Beginner to Expert
+
+🔹 PART 1: Structural Directives
+
+✅ What Are Structural Directives?
+Structural directives change the DOM layout by adding or removing elements.
+
+🔧 Built-in Structural Directives
+*ngIf
+*ngFor
+*ngSwitch, *ngSwitchCase, *ngSwitchDefault
+
+📘 Step-by-Step:
+
+🟢 1. *ngIf
+<div *ngIf="isLoggedIn">Welcome, Suri!</div>
+<div *ngIf="!isLoggedIn; else loginBlock">Please login.</div>
+
+<ng-template #loginBlock>
+  <p>You are not logged in.</p>
+</ng-template>
+
+🟢 2. *ngFor
+<ul>
+  <li *ngFor="let user of users; let i = index">
+    {{ i + 1 }}. {{ user.name }}
+  </li>
+</ul>
+
+🟢 3. *ngSwitch
+<div [ngSwitch]="role">
+  <p *ngSwitchCase="'admin'">Admin Panel</p>
+  <p *ngSwitchCase="'user'">User Dashboard</p>
+  <p *ngSwitchDefault>Guest View</p>
+</div>
+
+✅ Best Practices:
+Use trackBy with *ngFor for performance:
+
+<li *ngFor="let user of users; trackBy: trackByUserId">
+  {{ user.name }}
+</li>
+trackByUserId(index: number, user: any) {
+  return user.id;
+}
+
+🔹 PART 2: Attribute Directives
+
+✅ What Are Attribute Directives?
+Attribute directives change the appearance or behavior of an element.
+
+🔧 Built-in Attribute Directives
+
+🟢 1. ngClass
+<div [ngClass]="{'highlight': isHighlighted}">Text with dynamic class</div>
+
+🟢 2. ngStyle
+<p [ngStyle]="{'color': isError ? 'red' : 'green'}">Status Message</p>
+
+🟢 3. ngModel (Forms)
+<input [(ngModel)]="username" placeholder="Enter your name">
+<p>Hello, {{ username }}</p>
+
+✅ Best Practices:
+Avoid complex logic inside the template.
+Prefer component class logic over inline expressions.
+Keep style-related logic in the component using variables.
+
+🔹 PART 3: Custom Directives
+
+✅ Why Create Custom Directives?
+When built-in directives aren’t enough, create custom ones to encapsulate reusable behaviors.
+
+🛠️ Step-by-Step: Create an Attribute Directive
+🔹 1. Generate Directive
+ng generate directive highlight
+
+🔹 2. highlight.directive.ts
+
+import { Directive, ElementRef, HostListener, Input } from '@angular/core';
+
+@Directive({
+  selector: '[appHighlight]'
+})
+export class HighlightDirective {
+  @Input() appHighlight = 'yellow';
+
+  constructor(private el: ElementRef) {}
+
+  @HostListener('mouseenter') onMouseEnter() {
+    this.el.nativeElement.style.backgroundColor = this.appHighlight;
+  }
+
+  @HostListener('mouseleave') onMouseLeave() {
+    this.el.nativeElement.style.backgroundColor = '';
+  }
+}
+
+🔹 3. Use It in Template
+<p [appHighlight]="'lightgreen'">Hover to highlight!</p>
+
+✅ Best Practices for Custom Directives:
+Use @Input() to make them reusable.
+Use @HostListener() to react to events.
+Keep logic simple and testable.
+Prefix directive selector (appYourDirective) to avoid naming conflicts.
+
+📈 Become Expert - Activities
+
+🔄 Practice:
+Build a reusable directive for tooltip, conditional disabling, or permission-based visibility.
+Refactor *ngIf, ngClass, ngStyle logic into separate directives if reused across components.
+
+🧪 Mini Project Idea:
+Tooltip Directive
+Show a styled tooltip on hover using custom directive.
+Accept text via @Input() and display near the element.
+
+🧠 Summary Chart
+Directive Type	Examples	Use Case
+Structural	*ngIf, *ngFor, *ngSwitch	Add/remove/change DOM layout
+Attribute	ngClass, ngStyle, ngModel	Modify behavior or style of element
+Custom	appHighlight	Create reusable custom behavior
