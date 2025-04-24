@@ -144,9 +144,10 @@ Add/Remove dynamic child component and track destruction
 
 Day 16: Angular Directives
 
-*ngIf, *ngFor
+  1) Structural Directives 
+  2) Attribute Directives  
+  3) Create custom directive
 
-Create custom directive
 
 Day 17: Pipes
 
