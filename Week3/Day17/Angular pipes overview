@@ -11,7 +11,90 @@ Useful for formatting dates, currencies, numbers, text, and more.
 
 1. Built-in Pipes in Angular
 
-Angular comes with several built-in pipes:
+
+Here's a complete Angular 19 component example that demonstrates all commonly used built-in (predefined) pipes along with their properties/arguments, 
+so you get a full hands-on view.
+
+✅ Component Name: builtin-pipes-demo
+📁 Step 1: Create the Component
+ng generate component components/builtin-pipes-demo
+
+🧠 Step 2: Add Logic in builtin-pipes-demo.component.ts
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-builtin-pipes-demo',
+  templateUrl: './builtin-pipes-demo.component.html',
+})
+export class BuiltinPipesDemoComponent {
+  name: string = 'CodeAdmirer';
+  message: string = 'angular pipes demo';
+  today: Date = new Date();
+  price: number = 123456.789;
+  percentage: number = 0.876;
+  score: number = 95.6789;
+  users = [{ id: 1, name: 'CodeAdmirer' }, { id: 2, name: 'CodeAdmirerDev' }];
+  longText: string = 'This is a long sentence for slice pipe demo.';
+}
+
+🧾 Step 3: Add All Predefined Pipes in builtin-pipes-demo.component.html
+
+<h2>Angular Built-in Pipes Demo</h2>
+
+<!-- 1. Uppercase / Lowercase / Titlecase -->
+<p><strong>Original:</strong> {{ name }}</p>
+<p><strong>Uppercase:</strong> {{ name | uppercase }}</p>
+<p><strong>Lowercase:</strong> {{ name | lowercase }}</p>
+<p><strong>Titlecase:</strong> {{ message | titlecase }}</p>
+
+<!-- 2. Date Pipe -->
+<p><strong>Default Date:</strong> {{ today | date }}</p>
+<p><strong>Full Date:</strong> {{ today | date:'fullDate' }}</p>
+<p><strong>Short Time:</strong> {{ today | date:'shortTime' }}</p>
+<p><strong>Custom Format:</strong> {{ today | date:'dd/MM/yyyy HH:mm:ss' }}</p>
+
+<!-- 3. Currency Pipe -->
+<p><strong>Default (USD):</strong> {{ price | currency }}</p>
+<p><strong>INR with symbol:</strong> {{ price | currency:'INR':'symbol' }}</p>
+<p><strong>EUR with code:</strong> {{ price | currency:'EUR':'code' }}</p>
+<p><strong>JPY no decimals:</strong> {{ price | currency:'JPY':'symbol':'1.0-0' }}</p>
+
+<!-- 4. Percent Pipe -->
+<p><strong>Percentage (default):</strong> {{ percentage | percent }}</p>
+<p><strong>Percentage (1 digit):</strong> {{ percentage | percent:'1.0-1' }}</p>
+
+<!-- 5. Number Pipe -->
+<p><strong>Number (default):</strong> {{ score | number }}</p>
+<p><strong>1 integer, 2-3 decimals:</strong> {{ score | number:'1.2-3' }}</p>
+<p><strong>2 integers, 0 decimals:</strong> {{ score | number:'2.0-0' }}</p>
+
+<!-- 6. JSON Pipe -->
+<p><strong>Object to JSON:</strong></p>
+<pre>{{ users | json }}</pre>
+
+<!-- 7. Slice Pipe -->
+<p><strong>Original:</strong> {{ longText }}</p>
+<p><strong>Slice (0–10):</strong> {{ longText | slice:0:10 }}</p>
+<p><strong>Slice (10–end):</strong> {{ longText | slice:10 }}</p>
+
+🔍 Full Breakdown of Pipe Arguments
+
+Pipe	            Format Syntax	Description
+date	            'short', 'medium', 'fullDate', 'shortTime', or custom format like 'dd/MM/yyyy'	
+currency        	currencyCode, display, digitsInfo	
+percent          	digitsInfo like '1.0-2' → min 1 integer, 0 min decimals, max 2 decimals	
+number	          Same as percent – '1.2-3'	
+slice	            startIndex, endIndex	
+
+🔄 Step 4: Use in App Component
+Update app.component.html to use the new component:
+<app-builtin-pipes-demo></app-builtin-pipes-demo>
+
+📌 Summary
+✅ All built-in pipes demonstrated
+✅ Each pipe includes all its formatting options
+
+Also Angular comes with several built-in pipes:
 
 Pipe Name	                        Purpose	                                  Example Usage
 DatePipe	                        Formats dates	                            `{{ today
