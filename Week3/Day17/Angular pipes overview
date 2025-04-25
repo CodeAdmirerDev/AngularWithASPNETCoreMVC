@@ -1,0 +1,149 @@
+Let's dive into Angular pipes, focusing on built-in pipes and how to create custom pipes. 
+I'll provide a detailed, step-by-step guide from beginner to expert level, along with best practices.
+
+Angular Pipes: From Beginner to Expert
+
+What are Pipes?
+Pipes transform output in Angular templates.
+They take input data and return a transformed version without changing the original data.
+
+Useful for formatting dates, currencies, numbers, text, and more.
+
+1. Built-in Pipes in Angular
+
+Angular comes with several built-in pipes:
+
+Pipe Name	                        Purpose	                                  Example Usage
+DatePipe	                        Formats dates	                            `{{ today
+CurrencyPipe	                    Formats numbers as currency	              `{{ price
+DecimalPipe	                      Formats decimal numbers with precision	  `{{ 3.14159
+PercentPipe	                      Converts number to a percentage string	  `{{ 0.25
+JsonPipe	                        Converts object to JSON string	          `{{ object
+SlicePipe	                        Extracts a part of an array or string    	`{{ list
+LowerCasePipe	                    Converts text to lowercase	              `{{ name
+UpperCasePipe	                    Converts text to uppercase	              `{{ name
+
+
+Example:
+<p>Today's date: {{ today | date:'fullDate' }}</p>  
+<p>Price: {{ price | currency:'USD':'symbol' }}</p>  
+
+2. Creating Custom Pipes
+
+When built-in pipes aren't enough, you can create your own.
+
+Step-by-step:
+
+Step 1: Generate a Pipe
+Using Angular CLI:
+ng generate pipe your-pipe-name  
+
+E.g.:
+ng generate pipe reverse  
+
+This generates two files:
+reverse.pipe.ts
+reverse.pipe.spec.ts (for unit tests)
+
+Step 2: Implement Pipe Logic
+Open reverse.pipe.ts and implement the transform method.
+
+Example: Reverse a string.
+
+import { Pipe, PipeTransform } from '@angular/core';  
+@Pipe({  
+  name: 'reverse'  
+})  
+export class ReversePipe implements PipeTransform {  
+
+  transform(value: string): string {  
+    if (!value) return '';  
+    return value.split('').reverse().join('');  
+  }  
+
+}  
+
+Step 3: Register Pipe (if not using standalone)
+
+If your Angular version is pre-standalone:
+
+Add the pipe to declarations array in your module (typically app.module.ts):
+
+import { ReversePipe } from './reverse.pipe';  
+
+@NgModule({  
+  declarations: [  
+    ReversePipe,  
+    // other components, pipes  
+  ],  
+})  
+export class AppModule { }  
+
+For standalone pipes (Angular 14+), you can declare standalone: true in the @Pipe decorator and import them directly in components.
+
+Step 4: Use Your Pipe
+Use it in your template:
+
+<p>{{ 'Angular' | reverse }}</p> <!-- outputs: ralu gnA -->  
+
+3. Advanced Custom Pipe Techniques
+Pipes with Parameters
+You can accept additional arguments in transform:
+
+transform(value: string, limit: number): string {  
+  return value.substr(0, limit);  
+}  
+
+Usage:
+
+{{ message | truncate:10 }}  
+
+
+Pure vs Impure Pipes
+Pure pipe (default): runs only when input references change.
+Impure pipe: runs every change detection cycle.
+
+Set impure pipe by:
+
+@Pipe({  
+  name: 'example',  
+  pure: false  
+})  
+
+Use impure pipes sparingly—they can hurt performance.
+
+4. Testing Pipes
+Angular CLI generates .spec.ts files. Test your pipe:
+
+describe('ReversePipe', () => {  
+  const pipe = new ReversePipe();  
+
+  it('reverses string correctly', () => {  
+    expect(pipe.transform('abc')).toBe('cba');  
+  });  
+
+  it('returns empty string when value is null', () => {  
+    expect(pipe.transform(null)).toBe('');  
+  });  
+});  
+
+5. Best Practices for Pipes
+
+Best Practice	                                  Explanation
+Keep pipes stateless and pure                  	Avoid side effects and impure pipes
+Use pure: false pipes only when necessary	      To avoid performance issues
+Avoid heavy computations in pipes	              Pipes run often, keep logic light/sync
+Use pipes for display and formatting only	      Keep business logic inside components/services
+Give meaningful pipe names	                    Choose descriptive names for readability
+Parameterize pipes for flexibility            	Accept arguments to make your pipes reusable
+Always unit test your pipes	                    Ensure they work correctly in all cases
+
+
+6. Summary / Roadmap to Expertise
+
+Level	Goal	          How to Practice
+Beginner	            Understand built-in pipes and create a simple custom pipe	Use Angular docs, create pipes like “reverse”, “truncate”
+Intermediate	        Learn pure vs impure pipes, implement pipes with parameters	Build real-world scenarios; e.g., formatting data before display
+Advanced	            Optimize pipes for performance, write tests, create standalone pipes	Practice writing tests, learn pipe lifecycle, create reusable pipelines
+Expert	              Contribute to Angular open source, write complex pipes combining async handling or localization	Build libraries of pipes, explore AsyncPipe, use i18n, handle edge cases
+
