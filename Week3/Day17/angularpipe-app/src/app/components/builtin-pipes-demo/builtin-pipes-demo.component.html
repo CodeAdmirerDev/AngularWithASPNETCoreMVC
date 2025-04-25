@@ -1,0 +1,39 @@
+<p>builtin-pipes-demo </p>
+
+<!-- 1. Uppercase , lowercase, Titlecase examples -->
+
+<p><strong>Original :</strong>{{name}}</p>
+<p><strong>Uppercase :</strong>{{name| uppercase}}</p>
+<p><strong>lowercase :</strong>{{name| lowercase}}</p>
+<p><strong>Titlecase:</strong>{{name |titlecase}}</p>
+
+<!-- 2. Date pipes -->
+<p><strong>Default date :</strong>{{today |date}}</p>
+<p><strong>Full date :</strong>{{today |date:'fulldate'}}</p>
+<p><strong>Short time :</strong>{{today |date:'shortTime'}}</p>
+<p><strong>Custom format date :</strong>{{today |date:'dd/MM/YYYY HH:mm:ss'}}</p>
+
+<!-- 3. Currency pipes -->
+<p><strong>Default (usd) :</strong>{{price |currency}}</p>
+<p><strong>INR with symbol :</strong>{{price |currency:'INR':'symbol'}}</p>
+<p><strong>EUR with Code :</strong>{{price |currency:'EUR':'code'}}</p>
+<p><strong>JPY with no decimals :</strong>{{price |currency:'JPY':'symbol':'1.0-0'}}</p>
+
+<!-- 4. Percentage pipes -->
+<p><strong>Percentage Default  :</strong>{{percentage |percent}}</p>
+<p><strong>Percentage (1 digit)  :</strong>{{percentage |percent:'1.0-1'}}</p>
+
+<!-- 5. Number pipes -->
+<p><strong>Number Default  :</strong>{{score |number}}</p>
+<p><strong>1-integer, 2-3 decimal  :</strong>{{score |number:'1.2-3'}}</p>
+<p><strong>2-integer, 0 decimal  :</strong>{{score |number:'2.0-0'}}</p>
+
+<!-- 6. Json pipe -->
+ <p><strong>Object to Json :</strong></p>
+ <pre>{{users| json}}</pre>
+
+ <!-- 7.Slice pipes -->
+
+ <p><strong>Original:</strong>{{longText}}</p>
+ <p><strong>Slice (0-10):</strong>{{longText |slice:0:10}}</p> 
+ <p><strong>Slice (10- end):</strong>{{longText |slice:10}}</p>

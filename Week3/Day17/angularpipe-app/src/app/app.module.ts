@@ -3,10 +3,16 @@ import { BrowserModule, provideClientHydration, withEventReplay } from '@angular
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { BuiltinPipesDemoComponent } from './components/builtin-pipes-demo/builtin-pipes-demo.component';
+import { ReversePipe } from './pipes/reverse.pipe';
+import { SubstringImpurepipePipe } from './pipes/substring-impurepipe.pipe';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    BuiltinPipesDemoComponent,
+    ReversePipe,
+    SubstringImpurepipePipe
   ],
   imports: [
     BrowserModule,
