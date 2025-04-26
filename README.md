@@ -165,7 +165,7 @@ Logging
 
 Day 19: Authentication (Basics)
 
-JWT concept
+JWT concept and implementation process for client and server
 
 Token generation in .NET
 
