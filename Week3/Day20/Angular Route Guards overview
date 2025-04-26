@@ -11,7 +11,7 @@ CanActivate:        Decides if a user can navigate to a route.
 CanActivateChild:   Decides if a user can navigate to child routes.
 CanDeactivate:      Decides if a user can leave a route.
 Resolve:            Fetches data before the route is activated.
-CanLoad:            Checks if a module can be loaded.
+CanMatch:            Checks if a module can be loaded.
 
 
 Detailed Information on CanActivate
@@ -156,7 +156,7 @@ There are 4 types of route guards in Angular:
 CanActivate
 CanActivateChild
 CanDeactivate
-CanLoad
+CanMatch
 
 Angular also has Resolve which is not exactly a guard, but often related as it loads data before activating a route.
 
@@ -310,41 +310,42 @@ const routes: Routes = [
   }  
 ];  
 
-4. CanLoad Guard
+4. CanMatch Guard
 Prevents loading entire lazy-loaded modules if condition doesn’t match.
 
 Use case
 Not load admin module if user is not admin.
 
 Implementation
-can-load.guard.ts
+can-match.guard.ts
 
 import { Injectable } from '@angular/core';  
-import { CanLoad, Route, UrlSegment, Router } from '@angular/router';  
-import { AuthService } from './auth.service';  
+import { CanMatch, Route, UrlSegment, Router } from '@angular/router';  
+import { AuthService } from '../services/auth.service';
 
-@Injectable({ providedIn: 'root' })  
-export class CanLoadGuard implements CanLoad {  
+@Injectable({  
+  providedIn: 'root',  
+})  
+export class CanMatchGuard implements CanMatch {  
   constructor(private authService: AuthService, private router: Router) {}  
 
-  canLoad(route: Route, segments: UrlSegment[]): boolean {  
-    if (this.authService.isLoggedIn() && this.authService.userHasRole('admin')) {  
+  canMatch(route: Route, segments: UrlSegment[]): boolean {  
+    if (this.authService.isAuthenticated()) {  
       return true;  
     }  
-    this.router.navigate(['/']);  
+    this.router.navigate(['/login']);  
     return false;  
   }  
 }  
 
 Usage in routing:
 
-const routes: Routes = [  
-  {  
-    path: 'admin',  
-    loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule),  
-    canLoad: [CanLoadGuard]  
-  }  
-];  
+{  
+  path: 'admin',  
+  loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule),  
+  canMatch: [CanMatchGuard]  
+} 
+
 
 Summary Table
 
@@ -352,7 +353,7 @@ Guard	Interface	      Use Case	                                              Whe
 CanActivate	          CanActivate	Protect route access	                      Before activating route
 CanActivateChild	    CanActivateChild	Protect child routes	                Before activating child routes
 CanDeactivate	        CanDeactivate	Prevent leaving with unsaved changes	    Before leaving current route
-CanLoad	              CanLoad	Prevent loading lazy modules                  	Before lazy loading module
+CanMatch	            CanMatch Prevent loading lazy modules                  	Before lazy loading module
 
 Best Practices
 
