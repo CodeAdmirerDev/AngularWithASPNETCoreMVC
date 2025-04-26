@@ -177,8 +177,9 @@ AuthService logic
 
 Day 21: Practice Day
 
-Secure Angular app with login
-
+Secure Angular app with login with bootstrap UI 
+Include the JWT implimentation
+Use the Angualr Route Guards
 Deploy backend API to local IIS or Azure
 
 🔹 Week 4: Full Project
@@ -186,7 +187,7 @@ Focus: End-to-end project from scratch
 
 Day 22: Project Planning & UI Design
 
-Define use case (e.g., Task Manager / Employee Portal)
+Define use case (e.g., Employee Portal/ Portfolio website )
 
 Prepare layout and folder structure
 
