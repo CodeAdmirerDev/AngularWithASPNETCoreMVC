@@ -612,16 +612,19 @@ Run the project:
 dotnet run  
 
 Authenticate:
-POST /auth/login with body:
-json
+Sample URL : https://localhost:7086/api/auth/login
+POST /api/auth/login with body:
 {  
   "username": "admin",  
-  "passwordHash": "password"  
+  "passwordHash": "password",
+  "Role":"Admin"
 }  
 
 You'll receive an AccessToken and a RefreshToken.
 
 Access secured endpoints:
+
 Use Authorization: Bearer <AccessToken> header:
-GET /data/admin-data (Only for Admin)
-GET /data/user-data (User & Admin)
+
+GET https://localhost:7086/api/data/admin-data (Only for Admin)
+GET https://localhost:7086/api/data/user-data (User & Admin)
