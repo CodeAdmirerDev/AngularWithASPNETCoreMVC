@@ -178,8 +178,8 @@ AuthService logic
 Day 21: Practice Day
 
 Secure Angular app with login with bootstrap UI 
-Include the JWT implimentation
-Use the Angualr Route Guards
+Include the JWT implementation 
+Use the Angular Route Guards 
 Deploy backend API to local IIS or Azure
 
 🔹 Week 4: Full Project
