@@ -423,68 +423,102 @@ namespace AuthCheckerApp.Services
 
 5. Controllers/AuthController.cs 
 
-        [HttpPost("login")]  
-        public IActionResult Login([FromBody] User login)  
-        {  
-            var user = UserStore.Users.SingleOrDefault(u =>  
-                u.Username == login.Username && u.PasswordHash == login.PasswordHash);  
+using AuthCheckerApp.Models;
+using AuthCheckerApp.Services;
+using AuthCheckerApp.Stores;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
-            if (user == null)  
-                return Unauthorized("Invalid credentials");  
+namespace AuthCheckerApp.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class AuthController : ControllerBase
+    {
+        private TokenService _tokenService;
 
-            var accessToken = _tokenService.GenerateAccessToken(user);  
-            var refreshToken = _tokenService.GenerateRefreshToken(user.Username);  
+        public AuthController(TokenService tokenService) {
+        
+            _tokenService = tokenService;
+        }
 
-            // Store refresh token  
-            RefreshTokenStore.Tokens.Add(refreshToken);  
 
-            return Ok(new  
-            {  
-                AccessToken = accessToken,  
-                RefreshToken = refreshToken.Token  
-            });  
-        }  
+        [HttpPost("login")]
+        public IActionResult Login([FromBody]User loginUser)
+        {
 
-        [HttpPost("refresh")]  
-        public IActionResult Refresh([FromBody] string refreshToken)  
-        {  
-            var storedToken = RefreshTokenStore.Tokens.SingleOrDefault(t => t.Token == refreshToken);  
+            var user = UserStore.users.Where(u => u.Username == loginUser.Username && u.PasswordHash == loginUser.PasswordHash);
 
-            if (storedToken == null || storedToken.ExpiryDate < DateTime.UtcNow)  
-                return Unauthorized("Invalid or expired refresh token");  
+            if (user == null)
+            {
+                return Unauthorized("Invalid Creds");
+            }
 
-            var user = UserStore.Users.SingleOrDefault(u => u.Username == storedToken.Username);  
-            if (user == null)  
-                return Unauthorized("Invalid refresh token user");  
+            var accessToken = _tokenService.GenerateAccessToken(loginUser);
 
-            // Implement rotation: remove old refresh token  
-            RefreshTokenStore.Tokens.Remove(storedToken);  
+            var refreshToken = _tokenService.GetRefreshToken(loginUser.Username);
 
-            var newAccessToken = _tokenService.GenerateAccessToken(user);  
-            var newRefreshToken = _tokenService.GenerateRefreshToken(user.Username);  
+            //Store refresh token
 
-            RefreshTokenStore.Tokens.Add(newRefreshToken);  
+            RefreshTokenStore.refreshTokens.Add(refreshToken);
 
-            return Ok(new  
-            {  
-                AccessToken = newAccessToken,  
-                RefreshToken = newRefreshToken.Token  
-            });  
-        }  
+            return Ok( new {
+                AccessToken =accessToken,
+                RefreshToken = refreshToken
+            });
 
-        [Authorize]  
-        [HttpPost("logout")]  
-        public IActionResult Logout([FromBody] string refreshToken)  
-        {  
-            var storedToken = RefreshTokenStore.Tokens.SingleOrDefault(t => t.Token == refreshToken);  
-            if (storedToken != null)  
-            {  
-                RefreshTokenStore.Tokens.Remove(storedToken);  
-            }  
-            return NoContent();  
-        }  
-    }  
-}  
+        }
+
+        public IActionResult RefreshToken([FromBody]string refreshToken)
+        {
+            var storedToken = RefreshTokenStore.refreshTokens.SingleOrDefault(t=> t.Token == refreshToken);
+
+            if (storedToken == null || storedToken.ExpiryDate<DateTime.UtcNow) {
+
+                return Unauthorized("Invalid or expired token");
+            }
+
+            var user = UserStore.users.SingleOrDefault(u => u.Username == storedToken.Username);
+
+            if (user == null)
+            {
+                return Unauthorized("Invalid refresh token user");
+            }
+
+            //Implement rotation or remove old token 
+            RefreshTokenStore.refreshTokens.Remove(storedToken);
+
+            var newAccessToken = _tokenService.GenerateAccessToken(user);
+            var newRefrehToken = _tokenService.GetRefreshToken(user.Username);
+
+            RefreshTokenStore.refreshTokens.Add(newRefrehToken);
+
+            return Ok(new
+            {
+                AccessToken = newAccessToken,
+                RefreshToken = newRefrehToken
+
+            });
+        }
+
+        [Authorize]
+        [HttpPost("logout")]
+        public IActionResult Logout([FromBody]string refreshToken)
+        {
+            var storedToken = RefreshTokenStore.refreshTokens.SingleOrDefault(t=> t.Token == refreshToken);
+
+            if(storedToken != null)
+            {
+                RefreshTokenStore.refreshTokens.Remove(storedToken);
+            }
+
+            return NoContent();
+        }
+
+    }
+}
+
 
 6. Controllers/DataController.cs (Role-based secured endpoints)
 
@@ -559,7 +593,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();  
 
 var app = builder.Build();  
-
+ 
 app.UseRouting();  
 
 // IMPORTANT: UseAuthentication must come before UseAuthorization  
