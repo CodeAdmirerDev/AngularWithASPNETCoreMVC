@@ -13,10 +13,4 @@ export class ReversePipe implements PipeTransform {
     return value.split('').reverse().join('');
   }
 
-  // You can accept additional arguments in transform:
-
-  // transform(value:string, limit:number):string {
-  //   return value.substring(0,limit);
-  // }
-
 }
