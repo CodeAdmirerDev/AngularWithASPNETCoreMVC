@@ -307,6 +307,9 @@ AuthCheckerApp/
 |     |-- AuthController.cs  
 |     |-- DataController.cs  
 
+Add NuGet Package for JWT Authentication
+dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer  
+
 1. Models
 Models/User.cs
 namespace AuthCheckerApp.Models  
