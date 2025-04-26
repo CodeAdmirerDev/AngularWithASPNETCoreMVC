@@ -1,4 +1,4 @@
- Let’s explore Angular Route Guards, specifically CanActivate, and how you can use them effectively in your applications. 
+Let’s explore Angular Route Guards, specifically CanActivate, and how you can use them effectively in your applications. 
 We’ll cover the concepts, implementation steps, best practices, and provide a sample project.
 
 What are Angular Route Guards?
@@ -11,7 +11,7 @@ CanActivate:        Decides if a user can navigate to a route.
 CanActivateChild:   Decides if a user can navigate to child routes.
 CanDeactivate:      Decides if a user can leave a route.
 Resolve:            Fetches data before the route is activated.
-CanLoad:            Checks if a module can be loaded.
+CanMatch:            Checks if a module can be loaded.
 
 
 Detailed Information on CanActivate
@@ -87,27 +87,6 @@ export class AuthGuard implements CanActivate {
   }  
 }  
 
-Define Routes: Use the guard in your routing module.
-
-// app-routing.module.ts  
-import { NgModule } from '@angular/core';  
-import { RouterModule, Routes } from '@angular/router';  
-import { HomeComponent } from './home/home.component';  
-import { LoginComponent } from './login/login.component';  
-import { AuthGuard } from './guards/auth.guard';  
-
-const routes: Routes = [  
-  { path: 'home', component: HomeComponent, canActivate: [AuthGuard] },  
-  { path: 'login', component: LoginComponent },  
-  { path: '', redirectTo: '/login', pathMatch: 'full' },  
-];  
-
-@NgModule({  
-  imports: [RouterModule.forRoot(routes)],  
-  exports: [RouterModule],  
-})  
-export class AppRoutingModule {}  
-
 Create Components: Generate home and login components.
 
 ng generate component home  
@@ -147,13 +126,37 @@ export class HomeComponent {}
 
 
 
+Define Routes: Use the guard in your routing module.
+
+// app-routing.module.ts  
+import { NgModule } from '@angular/core';  
+import { RouterModule, Routes } from '@angular/router';  
+import { HomeComponent } from './home/home.component';  
+import { LoginComponent } from './login/login.component';  
+import { AuthGuard } from './guards/auth.guard';  
+
+const routes: Routes = [  
+  { path: 'home', component: HomeComponent, canActivate: [AuthGuard] },  
+  { path: 'login', component: LoginComponent },  
+  { path: '', redirectTo: '/login', pathMatch: 'full' },  
+];  
+
+@NgModule({  
+  imports: [RouterModule.forRoot(routes)],  
+  exports: [RouterModule],  
+})  
+export class AppRoutingModule {}  
+
+
+
+
 Here is the all Angular Route Guards Overview:
 
 There are 4 types of route guards in Angular:
 CanActivate
 CanActivateChild
 CanDeactivate
-CanLoad
+CanMatch
 
 Angular also has Resolve which is not exactly a guard, but often related as it loads data before activating a route.
 
@@ -307,41 +310,95 @@ const routes: Routes = [
   }  
 ];  
 
-4. CanLoad Guard
+4. CanMatch Guard
 Prevents loading entire lazy-loaded modules if condition doesn’t match.
+
+Why modules matter for lazy loading?
+Angular lazy loading works only with NgModules.
+Without a module, you cannot lazy load a plain component.
+AppModule is your root module, but feature modules are needed to split and lazy load.
+
+What happens inside after ng generate module…?
+adminteam.module.ts with AdminteamComponent declared.
+adminteam-routing.module.ts with route '' pointing to AdminteamComponent.
+Updated routes in AppRoutingModule to lazy load with loadChildren.
+
+Create a feature module to enable lazy loading
+
+You can generate a module that declares this component and supports lazy loading:
+
+ng generate module adminteam --route adminteam --module app.module  
+
+This command:
+Creates adminteam folder with adminteam.module.ts.
+Sets up routing for this feature.
+Updates AppRoutingModule for lazy loading.
+After this, you get a proper feature module that lazy loads your admin team feature.
+
+
+Create a Module for adminteam (recommended for lazy loading)
+Since Angular lazy loading works by loading modules, you need to create an AdminteamModule and declare AdminteamComponent inside it.
+
+Example: Create adminteam.module.ts
+
+import { NgModule } from '@angular/core';  
+import { CommonModule } from '@angular/common';  
+import { RouterModule, Routes } from '@angular/router';  
+import { AdminteamComponent } from './adminteam.component';  
+
+const routes: Routes = [  
+  { path: '', component: AdminteamComponent }  
+];  
+
+@NgModule({  
+  declarations: [AdminteamComponent],  
+  imports: [CommonModule, RouterModule.forChild(routes)]  
+})  
+export class AdminteamModule {}  
+
+Then, your lazy load route config looks like:
+
+{  
+  path: 'adminteam',  
+  loadChildren: () => import('./adminteam/adminteam.module').then(m => m.AdminteamModule)  
+}  
+
+Run the below command to create the dashboard component under the adminteam moduel:
+ng generate component adminteam/dashboard  
 
 Use case
 Not load admin module if user is not admin.
 
 Implementation
-can-load.guard.ts
+can-match.guard.ts
 
 import { Injectable } from '@angular/core';  
-import { CanLoad, Route, UrlSegment, Router } from '@angular/router';  
-import { AuthService } from './auth.service';  
+import { CanMatch, Route, UrlSegment, Router } from '@angular/router';  
+import { AuthService } from '../services/auth.service';
 
-@Injectable({ providedIn: 'root' })  
-export class CanLoadGuard implements CanLoad {  
+@Injectable({  
+  providedIn: 'root',  
+})  
+export class CanMatchGuard implements CanMatch {  
   constructor(private authService: AuthService, private router: Router) {}  
 
-  canLoad(route: Route, segments: UrlSegment[]): boolean {  
-    if (this.authService.isLoggedIn() && this.authService.userHasRole('admin')) {  
+  canMatch(route: Route, segments: UrlSegment[]): boolean {  
+    if (this.authService.isAuthenticated()) {  
       return true;  
     }  
-    this.router.navigate(['/']);  
+    this.router.navigate(['/login']);  
     return false;  
   }  
 }  
 
 Usage in routing:
 
-const routes: Routes = [  
-  {  
-    path: 'admin',  
-    loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule),  
-    canLoad: [CanLoadGuard]  
-  }  
-];  
+{  
+  path: 'admin',  
+  loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule),  
+  canMatch: [CanMatchGuard]  
+} 
+
 
 Summary Table
 
@@ -349,7 +406,7 @@ Guard	Interface	      Use Case	                                              Whe
 CanActivate	          CanActivate	Protect route access	                      Before activating route
 CanActivateChild	    CanActivateChild	Protect child routes	                Before activating child routes
 CanDeactivate	        CanDeactivate	Prevent leaving with unsaved changes	    Before leaving current route
-CanLoad	              CanLoad	Prevent loading lazy modules                  	Before lazy loading module
+CanMatch	            CanMatch Prevent loading lazy modules                  	Before lazy loading module
 
 Best Practices
 
