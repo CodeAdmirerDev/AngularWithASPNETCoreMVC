@@ -1,3 +1,5 @@
+using MiddlewareUsageInWebAPI.MiddlewaresInfo;
+
 namespace MiddlewareUsageInWebAPI
 {
     public class Program
@@ -6,11 +8,25 @@ namespace MiddlewareUsageInWebAPI
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // Add logging configuration (console by default)  
+            builder.Logging.ClearProviders();
+            builder.Logging.AddConsole();
+
+
             // Add services to the container.
 
             builder.Services.AddControllers();
 
             var app = builder.Build();
+
+
+            // Use custom exception handler middleware  
+            app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+            // Use custom logging middleware  
+            app.UseMiddleware<RequestLoggingMiddleware>();
+
+            app.MapGet("/", () => "Hello World!");
 
             // Configure the HTTP request pipeline.
 
@@ -20,6 +36,13 @@ namespace MiddlewareUsageInWebAPI
 
 
             app.MapControllers();
+
+            // Endpoint to test exception handling  
+            app.MapGet("/error", () =>
+            {
+                throw new Exception("Test exception!");
+            });
+
 
             app.Run();
         }
