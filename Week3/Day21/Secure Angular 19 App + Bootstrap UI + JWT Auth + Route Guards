@@ -518,7 +518,10 @@ jwt-auth-app/
         auth.service.ts
       guards/
         auth.guard.ts
+      interceptors/
+        jwt.interceptor.ts
       components/
         login/
         secure/
       app-routing.module.ts
+      app.module.ts
