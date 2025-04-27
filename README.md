@@ -174,11 +174,11 @@ Day 20: Angular Route Guards
 CanActivate
 
 AuthService logic
+JWT Interceptor: Automatically add the JWT token to HTTP requests
 
 Day 21: Practice Day
-
-Secure Angular app with login with bootstrap UI 
-Include the JWT implementation 
+Secure Angular app with login using Bootstrap UI
+Implement JWT in Angular
 Use the Angular Route Guards 
 Deploy backend API to local IIS or Azure
 
@@ -187,7 +187,7 @@ Focus: End-to-end project from scratch
 
 Day 22: Project Planning & UI Design
 
-Define use case (e.g., Employee Portal/ Portfolio website )
+Define use case (e.g., Employee Portal/Portfolio website)
 
 Prepare layout and folder structure
 
@@ -220,6 +220,7 @@ Day 27: Authentication Integration
 Login form in Angular
 
 Store and use JWT token
+JWT Interceptor (revisited) for token handling in every request
 
 Day 28: Error Handling
 
