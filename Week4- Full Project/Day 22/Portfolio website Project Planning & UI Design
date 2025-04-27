@@ -21,7 +21,7 @@ Page	      Purpose
 Home	      Introduction + Welcome
 About Me	  Skills, Experience
 Projects	  List of Projects with links/images
-Contact    	Contact Form (send email or show info)
+Contact    	Contact Form (send email and Submissions saved to Database)
 
 Core Functionalities:
 Reusable Angular Components (Header, Footer, Card, etc.)
@@ -29,36 +29,108 @@ Routing between pages
 API calls (simulate with fake backend)
 Responsive Design (mobile-friendly)
 
-2. 📦 Folder Structure Planning
-Good folder structure = Easy to maintain + Easy to scale!
+Technology Stack:
 
+Frontend: Angular
+Backend: ASP.NET Core Web API
+Database: SQLite (lightweight, file-based database)
+
+
+
+2. 🗂️ Folder Structure (Full Project)
+
+Good folder structure = Easy to maintain + Easy to scale!
 Here’s a professional Angular folder structure:
+
+Angular Project Structure:
 
 src/
  ├── app/
- │    ├── core/                # Singleton services (Auth, Api)
- │    ├── shared/              # Shared components (Header, Footer, Button)
- │    ├── modules/             # Feature modules (Home, About, Projects, Contact)
- │    ├── models/              # Interfaces/Types (Project.ts, ContactForm.ts)
- │    ├── interceptors/        # Http Interceptors (JwtInterceptor)
- │    ├── guards/              # Route Guards (AuthGuard if needed)
- │    ├── services/            # Common services (ProjectService, ContactService)
- │    ├── app-routing.module.ts# Routes Configuration
- │    ├── app.component.ts     # Main component
- │    └── app.module.ts        # Main module
+ │    ├── core/                # Singleton services (API, Auth, Global error handling)
+ │    │     ├── services/
+ │    │     │    ├── api.service.ts
+ │    │     │    └── auth.service.ts 
+ │    │     ├── guards/
+ │    │     │    └── auth.guard.ts 
+ │    │     ├── interceptors/
+ │    │     │    └── jwt.interceptor.ts
+ │    │     └── core.module.ts
+ │    │
+ │    ├── shared/              # Reusable UI components
+ │    │     ├── header/
+ │    │     ├── footer/
+ │    │     ├── button/
+ │    │     └── shared.module.ts
+ │    │
+ │    ├── modules/             # Feature modules (pages)
+ │    │     ├── home/
+ │    │     ├── about/
+ │    │     ├── skills/
+ │    │     ├── projects/
+ │    │     └── contact/
+ │    │
+ │    ├── models/              # Interfaces and types
+ │    │     ├── project.model.ts
+ │    │     └── contact-form.model.ts
+ │    │
+ │    ├── app-routing.module.ts# Application Routes
+ │    ├── app.component.ts     # Main Application Component
+ │    └── app.module.ts        # Root Angular Module
  │
- ├── assets/                   # Images, JSON, Static files
- ├── environments/             # Environment variables (dev, prod)
- ├── styles.scss               # Global SCSS
- └── index.html
+ ├── assets/                   # Static files (images, JSON, etc.)
+ ├── environments/             # Environment configs (dev, prod)
+ ├── styles.scss               # Global styles
+ └── index.html                 # Root HTML file
 
-3. 🎨 UI/UX Design Sketch
-Before coding, design basic layout either by hand or a tool like Figma.
+ASP.NET Core Project Structure: 
+
+/Controllers/
+ ├── HomeController.cs         # Handles static page routing
+ ├── ContactController.cs      # API endpoint for contact form submissions and email sendings
+
+/Models/
+ ├── ContactFormModel.cs        # Entity Model for SQLite
+
+/Data/
+ ├── AppDbContext.cs            # Entity Framework Core Context
+
+/Migrations/
+ ├── (Entity Framework Migrations)
+
+/Services/
+ ├── EmailService.cs            # For sending emails from Contact Form
+
+/wwwroot/
+ ├── (Angular built files will be here)
+
+/Database/
+ ├── portfolio.db               # SQLite database file
+
+Program.cs                      # Application Startup Code
+appsettings.json                # App Configuration (ConnectionStrings etc.)
+appsettings.Development.json    # Dev-specific configurations 
+
+
+📌 Notes on this Structure:
+
+Angular is now properly modularized (Core, Shared, Modules, Models).
+ASP.NET Core project has a clear separation (Controllers, Models, Data, Services).
+SQLite database portfolio.db is included under a /Database/ folder for clean management.
+Deployment-ready: Angular builds to /wwwroot, APIs and DB handled by ASP.NET backend.
+
+
+3. 🎨 UI/UX Layout Planning
+
+Wireframe Design:
+Tools: Figma, Adobe XD, or simple paper sketch.
+
+Example Layout:
 
 Simple Layout Idea:
 
 ---------------------------------------
 |                HEADER               |
+|           ( Navigation Bar)         |
 |  Logo | Home About Projects Contact |
 |-------------------------------------|
 |            PAGE CONTENT             |
@@ -78,65 +150,132 @@ Accent Color: Sky Blue
 Text: Dark Gray / White
 
 Typography:
-
 Main font: 'Poppins' or 'Roboto'
 
-4. 🛠️ Technologies to Use
 
-Purpose	Technology
-Frontend	Angular 17+
-Styling	TailwindCSS or SCSS
-Icons	FontAwesome or HeroIcons
-Backend ASP.NET Core WebAPI
+4. 🗄️ Database Setup (SQLite Integration)
 
-5. 🚀 Setup Quick Tasks (Today)
- Create Angular App: 
- ng new portfolio-website --no-standalone
+4.1 Install Required Packages
 
- Install TailwindCSS (Optional, or use SCSS)
+In your ASP.NET Core backend:
+dotnet add package Microsoft.EntityFrameworkCore
+dotnet add package Microsoft.EntityFrameworkCore.Sqlite
+dotnet add package Microsoft.EntityFrameworkCore.Tools
 
- Generate Core Pages:
-ng generate module modules/home --route home --module app.module
-ng generate module modules/about --route about --module app.module
-ng generate module modules/projects --route projects --module app.module
-ng generate module modules/contact --route contact --module app.module
+4.2 Configure SQLite in appsettings.json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Data Source=portfolio.db"
+  }
+}
 
- Create Shared Components:
-ng generate component shared/header
-ng generate component shared/footer
+4.3 Setup DbContext (AppDbContext.cs)
 
- Create Service Example:
-ng generate service services/project
+using Microsoft.EntityFrameworkCore;
 
- Setup Routing in app-routing.module.ts
+public class AppDbContext : DbContext
+{
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) {}
 
-📋 Example: Basic app-routing.module.ts
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+    public DbSet<ContactFormModel> Contacts { get; set; }
+}
 
-const routes: Routes = [
-  { path: '', redirectTo: 'home', pathMatch: 'full' },
-  { path: 'home', loadChildren: () => import('./modules/home/home.module').then(m => m.HomeModule) },
-  { path: 'about', loadChildren: () => import('./modules/about/about.module').then(m => m.AboutModule) },
-  { path: 'projects', loadChildren: () => import('./modules/projects/projects.module').then(m => m.ProjectsModule) },
-  { path: 'contact', loadChildren: () => import('./modules/contact/contact.module').then(m => m.ContactModule) },
-  { path: '**', redirectTo: 'home' }
-];
+4.4 Register DbContext in Program.cs
 
-@NgModule({
-  imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
-})
-export class AppRoutingModule { }
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+4.5 Create ContactForm Model
+public class ContactFormModel
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public string Email { get; set; }
+    public string Message { get; set; }
+}
+
+4.6 Migrate the Database
+dotnet ef migrations add InitialCreate
+dotnet ef database update
+
+✅ This will create a portfolio.db file in your project!
+
+5. 🚀 Deployment Setup (Angular + ASP.NET Core + SQLite in Single Publish)
+
+5.1 Build Angular Frontend for Production
+ng build --configuration production
+
+This generates the production files inside /dist/your-project-name/.
+
+5.2 Copy Angular Build Files to ASP.NET Core
+Copy the contents inside dist/your-project-name/
+
+Paste into wwwroot/ of your ASP.NET Core project.
+
+5.3 Configure ASP.NET Core to Serve Angular + API
+
+Modify Program.cs:
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllers();
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+var app = builder.Build();
+
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
+app.UseRouting();
+app.UseAuthorization();
+app.MapControllers();
+app.MapFallbackToFile("index.html");
+
+app.Run();
+
+5.4 Publish Combined Project
+
+In Visual Studio:
+
+Right-click ASP.NET Core Project → Publish
+
+Choose a Folder or FTP (for Somee hosting)
+
+Set Configuration to Release
+
+Publish
+
+The publish output will now include:
+
+Angular Frontend (inside wwwroot)
+
+ASP.NET Core APIs
+
+SQLite database file (portfolio.db)
+
+5.5 Deploy to Somee Hosting
+Upload your publish folder (including portfolio.db) to Somee File Manager or via FTP
+
+Configure the correct Application Pool (.NET 6/7/8)
+
+Your full website (Angular + API + SQLite DB) will be LIVE 🎉
+
+⚡ Final Deliverables for Day 22
+✅ Project Use Case Document
+✅ Basic UI Wireframe
+✅ Folder Structure Prepared
+✅ SQLite Database Integrated
+✅ FullStack Deployment Setup (Single Publish)
+✅ Local Testing + Deployment Ready
+
 
 📢 Best Practices for Day 22:
 
 🧹 Plan your folder structure before writing code.
 🎨 Prepare UI sketches or Figma screens for faster development.
 🛡️ Keep a core and shared folder separation.
-
 🚦 Setup routing from day 1.
-
 🧩 Reuse components like Header, Footer, Button.
 📈 Keep services slim and clean (no direct HTTP in components).
 
