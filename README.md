@@ -197,6 +197,7 @@ CanActivate
 
 AuthService logic
 
+What is an Angular Interceptor?
 JWT Interceptor: Automatically add the JWT token to HTTP requests
 
 
