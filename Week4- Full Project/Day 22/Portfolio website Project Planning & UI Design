@@ -1,1 +1,150 @@
+You are entering Week 4 – the real fun starts now: building a full project from scratch.
 
+Day 22: Project Planning & UI Design
+
+Use Case Example: Portfolio Website
+
+📅 Day 22 Plan: Project Planning & UI Design
+
+1. 📚 Define Use Case: "Portfolio Website"
+
+Objective:
+Create a professional portfolio website to showcase:
+Personal Information (Name, About, Skills)
+Projects Gallery
+Resume/CV Download
+Contact Form (Email/Phone/LinkedIn)
+
+Main Pages:
+
+Page	      Purpose
+Home	      Introduction + Welcome
+About Me	  Skills, Experience
+Projects	  List of Projects with links/images
+Contact    	Contact Form (send email or show info)
+
+Core Functionalities:
+Reusable Angular Components (Header, Footer, Card, etc.)
+Routing between pages
+API calls (simulate with fake backend)
+Responsive Design (mobile-friendly)
+
+2. 📦 Folder Structure Planning
+Good folder structure = Easy to maintain + Easy to scale!
+
+Here’s a professional Angular folder structure:
+
+src/
+ ├── app/
+ │    ├── core/                # Singleton services (Auth, Api)
+ │    ├── shared/              # Shared components (Header, Footer, Button)
+ │    ├── modules/             # Feature modules (Home, About, Projects, Contact)
+ │    ├── models/              # Interfaces/Types (Project.ts, ContactForm.ts)
+ │    ├── interceptors/        # Http Interceptors (JwtInterceptor)
+ │    ├── guards/              # Route Guards (AuthGuard if needed)
+ │    ├── services/            # Common services (ProjectService, ContactService)
+ │    ├── app-routing.module.ts# Routes Configuration
+ │    ├── app.component.ts     # Main component
+ │    └── app.module.ts        # Main module
+ │
+ ├── assets/                   # Images, JSON, Static files
+ ├── environments/             # Environment variables (dev, prod)
+ ├── styles.scss               # Global SCSS
+ └── index.html
+
+3. 🎨 UI/UX Design Sketch
+Before coding, design basic layout either by hand or a tool like Figma.
+
+Simple Layout Idea:
+
+---------------------------------------
+|                HEADER               |
+|  Logo | Home About Projects Contact |
+|-------------------------------------|
+|            PAGE CONTENT             |
+|                                     |
+|-------------------------------------|
+|              FOOTER                 |
+|         Copyright © 2025            |
+--------------------------------------
+
+Header: Navigation menu
+Footer: Social links, copyright
+Page Content: Changes based on route (<router-outlet>)
+
+Color Theme:
+Primary Color: Deep Blue
+Accent Color: Sky Blue
+Text: Dark Gray / White
+
+Typography:
+
+Main font: 'Poppins' or 'Roboto'
+
+4. 🛠️ Technologies to Use
+
+Purpose	Technology
+Frontend	Angular 17+
+Styling	TailwindCSS or SCSS
+Icons	FontAwesome or HeroIcons
+Backend ASP.NET Core WebAPI
+
+5. 🚀 Setup Quick Tasks (Today)
+ Create Angular App: 
+ ng new portfolio-website --no-standalone
+
+ Install TailwindCSS (Optional, or use SCSS)
+
+ Generate Core Pages:
+ng generate module modules/home --route home --module app.module
+ng generate module modules/about --route about --module app.module
+ng generate module modules/projects --route projects --module app.module
+ng generate module modules/contact --route contact --module app.module
+
+ Create Shared Components:
+ng generate component shared/header
+ng generate component shared/footer
+
+ Create Service Example:
+ng generate service services/project
+
+ Setup Routing in app-routing.module.ts
+
+📋 Example: Basic app-routing.module.ts
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+
+const routes: Routes = [
+  { path: '', redirectTo: 'home', pathMatch: 'full' },
+  { path: 'home', loadChildren: () => import('./modules/home/home.module').then(m => m.HomeModule) },
+  { path: 'about', loadChildren: () => import('./modules/about/about.module').then(m => m.AboutModule) },
+  { path: 'projects', loadChildren: () => import('./modules/projects/projects.module').then(m => m.ProjectsModule) },
+  { path: 'contact', loadChildren: () => import('./modules/contact/contact.module').then(m => m.ContactModule) },
+  { path: '**', redirectTo: 'home' }
+];
+
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule]
+})
+export class AppRoutingModule { }
+
+📢 Best Practices for Day 22:
+
+🧹 Plan your folder structure before writing code.
+🎨 Prepare UI sketches or Figma screens for faster development.
+🛡️ Keep a core and shared folder separation.
+
+🚦 Setup routing from day 1.
+
+🧩 Reuse components like Header, Footer, Button.
+📈 Keep services slim and clean (no direct HTTP in components).
+
+✅ Summary of Day 22:
+
+Topic	Status
+Project Use Case Defined	✅
+Folder Structure Designed	✅
+UI/UX Rough Design Done	✅
+Technologies Decided	✅
+Setup Checklist Ready	✅
