@@ -155,24 +155,87 @@ Unsubscribe from Observables: Avoid memory leaks by unsubscribing from the Obser
 
 
 Sample Project Code: Angular + JWT Interceptor Example
-1. Create a New Angular App:
 
+
+🛠️ Full Project: jwt-interceptor-demo
+
+1. Create Angular App:
 ng new jwt-interceptor-demo --no-standalone
 cd jwt-interceptor-demo
 
-2. Install HttpClientModule:
-ng add @angular/common/http
+2. Install Dependencies (if not already):
+npm install
 
-3. Add JWT Interceptor to the App:
 
-Follow the steps above to create the JwtInterceptor class.
+3. Create jwt.interceptor.ts:
 
-Register it in AppModule.
+// src/app/jwt.interceptor.ts
+import { Injectable } from '@angular/core';
+import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
-4. Modify an API Service:
+@Injectable()
+export class JwtInterceptor implements HttpInterceptor {
+  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    // Get the JWT token from localStorage
+    const token = localStorage.getItem('token');
 
-Create a service that calls an API using the HttpClient, and make use of the JWT interceptor.
+    // Clone the request and attach Authorization header if token exists
+    if (token) {
+      req = req.clone({
+        setHeaders: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+    }
 
+    // Handle errors globally
+    return next.handle(req).pipe(
+      catchError((error: HttpErrorResponse) => {
+        if (error.status === 401) {
+          console.error('Unauthorized! Redirect to login.');
+          // Example: redirect to login
+          window.location.href = '/login'; // Replace with router.navigate if you have Router
+        }
+        return throwError(() => error);
+      })
+    );
+  }
+}
+
+4. Update app.module.ts:
+
+// src/app/app.module.ts
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { AppComponent } from './app.component';
+import { JwtInterceptor } from './jwt.interceptor'; // <- import the interceptor
+
+@NgModule({
+  declarations: [
+    AppComponent
+  ],
+  imports: [
+    BrowserModule,
+    HttpClientModule
+  ],
+  providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: JwtInterceptor,
+      multi: true
+    }
+  ],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+
+
+5. Create api.service.ts:
+
+// src/app/api.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -181,23 +244,27 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class ApiService {
-  private apiUrl = 'https://api.example.com';
+  private apiUrl = 'https://jsonplaceholder.typicode.com'; // fake API for demo
 
   constructor(private http: HttpClient) {}
 
   getData(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/data`);
+    return this.http.get<any>(`${this.apiUrl}/posts`);
   }
 }
 
-5. Update Component to Call API:
+6. Update app.component.ts:
 
+// src/app/app.component.ts
 import { Component, OnInit } from '@angular/core';
 import { ApiService } from './api.service';
 
 @Component({
   selector: 'app-root',
-  template: `<h1>Data from API</h1><pre>{{ data | json }}</pre>`
+  template: `
+    <h1>Data from API</h1>
+    <pre>{{ data | json }}</pre>
+  `
 })
 export class AppComponent implements OnInit {
   data: any;
@@ -205,22 +272,66 @@ export class AppComponent implements OnInit {
   constructor(private apiService: ApiService) {}
 
   ngOnInit(): void {
-    this.apiService.getData().subscribe(response => {
-      this.data = response;
+    // Just for testing, let's save a fake token
+    localStorage.setItem('token', 'fake-jwt-token');
+
+    this.apiService.getData().subscribe({
+      next: (response) => {
+        this.data = response;
+      },
+      error: (err) => {
+        console.error('API Error:', err);
+      }
     });
   }
 }
 
-6. Sample Response Handler in Interceptor:
+✅ Now your project structure looks like:
 
-// Interceptor catches 401 errors and redirects to login page
-catchError(error => {
-  if (error.status === 401) {
-    console.log('Unauthorized, redirecting to login');
-    // Redirect to login page logic here
-  }
-  return throwError(error);
-});
+src/
+ ├── app/
+ │    ├── api.service.ts
+ │    ├── app.component.ts
+ │    ├── app.module.ts
+ │    ├── jwt.interceptor.ts
+ │
+ ├── index.html
+ ├── main.ts
+ ├── ...
+
+🚀 When you run:
+ng serve
+
+Angular will automatically attach JWT token to every API request
+
+If a 401 Unauthorized error occurs, it will redirect to login page (you can improve this later using Angular Router)
+
+🧠 Real-World Use Cases of Interceptors:
+
+Use Case	          Example
+Attach Token	      Automatically attach Authorization token to every request
+Global Error        Handling	Handle 401, 403, 500 status globally
+API Logging	        Log all outgoing requests and responses for debugging
+Modify Requests	    Add custom headers like timezone, language preference
+Retry Logic        	Retry a failed API call before throwing error
+
+🌟 Best Practices for JWT Interceptor:
+
+Keep Token Securely:   Prefer Angular Services or Secure Cookies over LocalStorage in production.
+Handle Token Expiry:   Use refresh tokens if your server supports it.
+Global Error Handling: Always catch and manage errors inside the interceptor.
+Modularize Code:       Create separate services for Auth, Token management.
+Avoid Hardcoded URLs:  Use environment.ts files to manage API base URLs.
+
+🔥 Bonus Improvement:
+If you want, I can also show you how to:
+
+Protect routes with AuthGuard
+Auto logout user if token expired
+Use environment variables for API URL
+
+Real API integration with .NET backend instead of jsonplaceholder!
+
 
 Use Cases for Interceptors:
 
