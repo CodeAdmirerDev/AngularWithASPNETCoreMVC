@@ -8,19 +8,13 @@
 Focus: Learn Angular basics & ASP.NET Core MVC fundamentals
 
 Day 1: Environment Setup & Overview
-
 Install Node.js, Angular CLI, .NET SDK
-
 Visual Studio/VS Code setup
-
 Overview of Angular & ASP.NET Core architecture
 
 Day 2: Angular Components & Modules
-
 Create components
-
 Understand AppModule
-
 Data binding (Interpolation, Event binding)
 
 Day 3: Angular Routing
