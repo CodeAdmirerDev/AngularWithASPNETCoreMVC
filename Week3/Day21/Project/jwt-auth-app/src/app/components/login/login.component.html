@@ -1,0 +1,16 @@
+<div class="container mt-5">
+    <div class="card p-4">
+      <h3>Login</h3>
+      <form (ngSubmit)="login()">
+        <div class="mb-3">
+          <input type="text" class="form-control" [(ngModel)]="username" name="username" placeholder="Username">
+        </div>
+        <div class="mb-3">
+          <input type="password" class="form-control" [(ngModel)]="password" name="password" placeholder="Password">
+        </div>
+        <button type="submit" class="btn btn-primary">Login</button>
+        <div *ngIf="error" class="text-danger mt-2">{{ error }}</div>
+      </form>
+    </div>
+  </div>
+  
