@@ -1,0 +1,247 @@
+What is an Angular Interceptor?
+An Angular Interceptor is a service that allows you to intercept and modify HTTP requests and responses globally. 
+
+Interceptors provide a way to handle tasks such as:
+
+Adding authentication tokens to requests (JWT, for example).
+Handling global error messages or API response errors.
+Modifying request headers.
+Adding global request retries.
+Logging requests and responses for debugging.
+
+Interceptors are useful for performing actions before a request is sent or after a response is received. 
+For example, you can use interceptors to add authentication tokens to each HTTP request or to handle errors that occur during API calls.
+
+Types of Interceptors:
+
+Request Interceptor:
+Modify HTTP requests before they are sent to the server.
+
+Common use case: Add headers (e.g., authentication tokens).
+
+Response Interceptor:
+Modify or handle the response after the server sends the data back.
+Common use case: Handle errors globally or parse/transform the response.
+
+Error Handling:
+Interceptors allow you to catch HTTP errors globally, so you can centralize your error handling.
+
+Detailed Step-by-Step Guide to Become a Beginner to Expert in Angular Interceptors:
+
+Step 1: Understand the Basics of Angular HTTP Client
+
+Before diving into interceptors, you should be familiar with Angular's HttpClientModule. 
+It is used to make HTTP requests and handle responses.
+
+HttpClientModule is a part of Angular's @angular/common/http package.
+
+Install HttpClientModule in your AppModule.
+
+import { HttpClientModule } from '@angular/common/http';
+
+@NgModule({
+  declarations: [AppComponent],
+  imports: [BrowserModule, HttpClientModule],
+  bootstrap: [AppComponent]
+})
+export class AppModule {}
+
+Step 2: Create an HTTP Interceptor
+
+An interceptor is a class that implements HttpInterceptor interface. 
+This interface has a method intercept() that gives you access to the outgoing request and the incoming response.
+
+Interceptor Example:
+
+import { Injectable } from '@angular/core';
+import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { throwError } from 'rxjs';
+
+@Injectable()
+export class JwtInterceptor implements HttpInterceptor {
+
+  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    // Add authorization header with JWT token
+    const authToken = localStorage.getItem('jwt_token');
+    if (authToken) {
+      req = req.clone({
+        setHeaders: {
+          Authorization: `Bearer ${authToken}`
+        }
+      });
+    }
+
+    return next.handle(req).pipe(
+      catchError(error => {
+        // Handle error responses globally
+        if (error.status === 401) {
+          console.log('Unauthorized access - Redirecting to login');
+        }
+        return throwError(error);
+      })
+    );
+  }
+}
+
+HttpRequest: Represents the request object. You can modify it using the clone() method.
+
+HttpHandler: Handles the request after it has been modified.
+
+HttpEvent: Represents the HTTP response.
+
+catchError: Allows you to catch errors and handle them globally.
+
+Step 3: Register the Interceptor
+
+To use the interceptor globally in your Angular application, you need to register it in the AppModule.
+
+AppModule Example:
+
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { AppComponent } from './app.component';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { JwtInterceptor } from './jwt.interceptor';
+
+@NgModule({
+  declarations: [AppComponent],
+  imports: [BrowserModule, HttpClientModule],
+  providers: [
+    { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true }
+  ],
+  bootstrap: [AppComponent]
+})
+export class AppModule {}
+
+
+In this example:
+
+The HTTP_INTERCEPTORS is used to provide the JwtInterceptor.
+
+The multi: true option ensures that Angular allows multiple interceptors.
+
+Step 4: Error Handling with Interceptors
+One of the main uses of interceptors is to handle errors globally. 
+Instead of handling errors in every HTTP request, you can centralize error handling in the interceptor.
+
+In the catchError() function of the interceptor, you can implement logic to handle different types of HTTP errors, such as:
+
+401 Unauthorized: When authentication fails, you can redirect the user to the login page.
+
+404 Not Found: When the requested resource is not available.
+
+500 Internal Server Error: When there is a server issue.
+
+Step 5: Best Practices for Angular Interceptors
+
+Do Not Modify the Request In-Place: Always clone the request and then modify it using the clone() method. 
+Angular requests are immutable, and modifying them directly could lead to unexpected behavior.
+
+req = req.clone({
+  setHeaders: {
+    Authorization: `Bearer ${authToken}`
+  }
+});
+
+Handle Errors Gracefully: Always handle errors globally using interceptors to reduce duplication and make your code cleaner.
+
+Separate Concerns: Keep different interceptors for different tasks (e.g., one for authentication and another for logging).
+
+Use Interceptors for Caching and Retry Logic: Use interceptors to add custom caching or retry mechanisms when making HTTP requests to optimize network usage.
+
+Unsubscribe from Observables: Avoid memory leaks by unsubscribing from the Observables within your interceptors when necessary (use take(1) or async pipe in templates).
+
+
+Sample Project Code: Angular + JWT Interceptor Example
+1. Create a New Angular App:
+
+ng new jwt-interceptor-demo --no-standalone
+cd jwt-interceptor-demo
+
+2. Install HttpClientModule:
+ng add @angular/common/http
+
+3. Add JWT Interceptor to the App:
+
+Follow the steps above to create the JwtInterceptor class.
+
+Register it in AppModule.
+
+4. Modify an API Service:
+
+Create a service that calls an API using the HttpClient, and make use of the JWT interceptor.
+
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class ApiService {
+  private apiUrl = 'https://api.example.com';
+
+  constructor(private http: HttpClient) {}
+
+  getData(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/data`);
+  }
+}
+
+5. Update Component to Call API:
+
+import { Component, OnInit } from '@angular/core';
+import { ApiService } from './api.service';
+
+@Component({
+  selector: 'app-root',
+  template: `<h1>Data from API</h1><pre>{{ data | json }}</pre>`
+})
+export class AppComponent implements OnInit {
+  data: any;
+
+  constructor(private apiService: ApiService) {}
+
+  ngOnInit(): void {
+    this.apiService.getData().subscribe(response => {
+      this.data = response;
+    });
+  }
+}
+
+6. Sample Response Handler in Interceptor:
+
+// Interceptor catches 401 errors and redirects to login page
+catchError(error => {
+  if (error.status === 401) {
+    console.log('Unauthorized, redirecting to login');
+    // Redirect to login page logic here
+  }
+  return throwError(error);
+});
+
+Use Cases for Interceptors:
+
+Authentication:
+Automatically attach JWT tokens to requests.
+Handle token expiration or unauthorized access errors.
+
+Logging:
+Log HTTP requests and responses for debugging purposes.
+
+Error Handling:
+Handle common errors (401, 404, 500) globally, improving user experience.
+
+Caching:
+Cache successful responses to avoid redundant network requests.
+
+Custom Headers:
+Attach custom headers (e.g., content-type, language, etc.) to every request.
+
+Conclusion:
+By following the above steps, you can become proficient in using Angular interceptors to manage HTTP requests, handle errors,
+and apply best practices in real-world applications. Implementing JWT authentication, error handling, 
+and logging with interceptors will improve the structure and maintainability of your code. 
+You can apply these concepts in a real-world Angular project to create a secure and well-optimized full-stack application.
