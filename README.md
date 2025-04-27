@@ -5,6 +5,7 @@
 🎯 Goal: Become proficient in full-stack development using Angular (frontend) + ASP.NET Core MVC (backend)
 
 🔹 Week 1: Fundamentals & Setup
+
 Focus: Learn Angular basics & ASP.NET Core MVC fundamentals
 
 Day 1: Environment Setup & Overview
@@ -68,7 +69,9 @@ Build simple Angular app (ToDo/Counter)
 Create basic ASP.NET Core MVC app
 
 
-🔹 Week 2: API & Integration Focus: Learn to create and consume Web APIs
+🔹 Week 2: API & Integration 
+
+Focus: Learn to create and consume Web APIs
 
 
 Day 8: Create ASP.NET Core Web API
@@ -124,7 +127,9 @@ Build mini project: Product Catalog
 Full CRUD with API integration
 
 
-🔹 Week 3: Intermediate Concepts Focus: Advanced Angular & ASP.NET Core features
+🔹 Week 3: Intermediate Concepts 
+
+Focus: Advanced Angular & ASP.NET Core features
 
 
 Day 15: Component Communication
@@ -206,7 +211,9 @@ Use the Angular Route Guards
 Deploy backend API to local IIS or Azure
 
 
-🔹 Week 4: Full Project Focus: End-to-end project from scratch
+🔹 Week 4: Full Project 
+
+Focus: End-to-end project from scratch
 
 
 Day 22: Project Planning & UI Design
