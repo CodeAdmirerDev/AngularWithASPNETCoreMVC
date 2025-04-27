@@ -1,0 +1,392 @@
+🛠 Day 21 Task Plan:
+Secure Angular 19 App + Bootstrap UI + JWT Auth + Route Guards + Deploy Backend to IIS/Azure
+
+Part 1: Set up the Backend (ASP.NET Core 8 Web API)
+
+1.1. Create WebAPI Project
+dotnet new webapi -n JwtAuthApi
+cd JwtAuthApi
+
+✅ Make sure you select .NET 8 SDK.
+
+1.2. Configure Authentication
+Install NuGet Packages:
+
+dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer
+
+Update appsettings.json
+{
+  "Jwt": {
+    "Key": "ThisIsASuperSecretKeyForJwtTokenDontShare",
+    "Issuer": "JwtAuthApi",
+    "Audience": "JwtAuthApiUser",
+    "DurationInMinutes": 60
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*"
+}
+
+Create Models/UserModel.cs
+
+namespace JwtAuthApi.Models
+{
+    public class UserModel
+    {
+        public string Username { get; set; }
+        public string Password { get; set; }
+    }
+}
+
+Create Services/TokenService.cs
+
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+
+namespace JwtAuthApi.Services
+{
+    public class TokenService
+    {
+        private readonly IConfiguration _config;
+
+        public TokenService(IConfiguration config)
+        {
+            _config = config;
+        }
+
+        public string CreateToken(string username)
+        {
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.Name, username)
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: _config["Jwt:Issuer"],
+                audience: _config["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.Now.AddMinutes(Convert.ToDouble(_config["Jwt:DurationInMinutes"])),
+                signingCredentials: creds
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+    }
+}
+
+Create Controllers/AuthController.cs
+
+using JwtAuthApi.Models;
+using JwtAuthApi.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace JwtAuthApi.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class AuthController : ControllerBase
+    {
+        private readonly TokenService _tokenService;
+
+        public AuthController(TokenService tokenService)
+        {
+            _tokenService = tokenService;
+        }
+
+        [HttpPost("login")]
+        public IActionResult Login([FromBody] UserModel user)
+        {
+            // Dummy validation
+            if (user.Username == "admin" && user.Password == "password")
+            {
+                var token = _tokenService.CreateToken(user.Username);
+                return Ok(new { token });
+            }
+            return Unauthorized();
+        }
+
+        [Authorize]
+        [HttpGet("secure-data")]
+        public IActionResult GetSecureData()
+        {
+            return Ok(new { data = "This is a protected data only visible to authenticated users." });
+        }
+    }
+}
+
+Modify Program.cs
+
+using JwtAuthApi.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services
+builder.Services.AddSingleton<TokenService>();
+builder.Services.AddControllers();
+
+// JWT Authentication
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        };
+    });
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+var app = builder.Build();
+
+app.UseSwagger();
+app.UseSwaggerUI();
+
+app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();
+
+Part 2: Set up the Angular 19 App (with Bootstrap and Route Guards)
+
+2.1. Create Angular App
+ng new jwt-auth-app --routing --style=scss
+cd jwt-auth-app
+
+✅ Important: Choose "No" when it asks about standalone components!
+
+2.2. Install Bootstrap
+npm install bootstrap
+
+Add to angular.json:
+
+"styles": [
+  "node_modules/bootstrap/dist/css/bootstrap.min.css",
+  "src/styles.scss"
+]
+
+2.3. Create Auth Service
+ng generate service services/auth
+
+src/app/services/auth.service.ts
+
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AuthService {
+  private baseUrl = 'https://localhost:5001/api/auth';
+  
+  constructor(private http: HttpClient, private router: Router) { }
+
+  login(username: string, password: string) {
+    return this.http.post<any>(`${this.baseUrl}/login`, { username, password });
+  }
+
+  logout() {
+    localStorage.removeItem('token');
+    this.router.navigate(['/login']);
+  }
+
+  isLoggedIn(): boolean {
+    return !!localStorage.getItem('token');
+  }
+
+  getToken() {
+    return localStorage.getItem('token');
+  }
+}
+
+2.4. Create Auth Guard
+ng generate guard guards/auth
+
+src/app/guards/auth.guard.ts
+
+import { Injectable } from '@angular/core';
+import { CanActivate, Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AuthGuard implements CanActivate {
+
+  constructor(private authService: AuthService, private router: Router) {}
+
+  canActivate(): boolean {
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/login']);
+      return false;
+    }
+    return true;
+  }
+}
+
+2.5. Create Login Component
+ng generate component components/login
+
+src/app/components/login/login.component.ts
+
+import { Component } from '@angular/core';
+import { AuthService } from '../../services/auth.service';
+import { Router } from '@angular/router';
+
+@Component({
+  selector: 'app-login',
+  templateUrl: './login.component.html'
+})
+export class LoginComponent {
+  username = '';
+  password = '';
+  error = '';
+
+  constructor(private authService: AuthService, private router: Router) { }
+
+  login() {
+    this.authService.login(this.username, this.password).subscribe({
+      next: (res) => {
+        localStorage.setItem('token', res.token);
+        this.router.navigate(['/secure']);
+      },
+      error: () => this.error = 'Invalid login'
+    });
+  }
+}
+
+src/app/components/login/login.component.html
+
+<div class="container mt-5">
+  <div class="card p-4">
+    <h3>Login</h3>
+    <form (ngSubmit)="login()">
+      <div class="mb-3">
+        <input type="text" class="form-control" [(ngModel)]="username" name="username" placeholder="Username">
+      </div>
+      <div class="mb-3">
+        <input type="password" class="form-control" [(ngModel)]="password" name="password" placeholder="Password">
+      </div>
+      <button type="submit" class="btn btn-primary">Login</button>
+      <div *ngIf="error" class="text-danger mt-2">{{ error }}</div>
+    </form>
+  </div>
+</div>
+
+2.6. Create Secure Page
+ng generate component components/secure
+
+src/app/components/secure/secure.component.ts
+
+import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+
+@Component({
+  selector: 'app-secure',
+  templateUrl: './secure.component.html'
+})
+export class SecureComponent implements OnInit {
+  data = '';
+
+  constructor(private http: HttpClient) { }
+
+  ngOnInit() {
+    const token = localStorage.getItem('token');
+    this.http.get<any>('https://localhost:5001/api/auth/secure-data', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }).subscribe(res => {
+      this.data = res.data;
+    });
+  }
+}
+
+src/app/components/secure/secure.component.html
+
+<div class="container mt-5">
+  <h2>Secure Page</h2>
+  <p>{{ data }}</p>
+</div>
+
+2.7. Update Routing
+src/app/app-routing.module.ts
+
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+import { LoginComponent } from './components/login/login.component';
+import { SecureComponent } from './components/secure/secure.component';
+import { AuthGuard } from './guards/auth.guard';
+
+const routes: Routes = [
+  { path: 'login', component: LoginComponent },
+  { path: 'secure', component: SecureComponent, canActivate: [AuthGuard] },
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
+];
+
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule]
+})
+export class AppRoutingModule { }
+
+Part 3: Deploy Web API to Local IIS or Azure
+
+3.1 Deploy to Local IIS
+Publish project in Visual Studio ➔ Folder profile.
+Set up Application Pool (No Managed Code).
+Create IIS Site pointing to your publish folder.
+Bind it to your domain like https://localhost/api/auth.
+
+3.2 Deploy to Azure
+Right-click project ➔ Publish ➔ Azure ➔ Create App Service.
+Update appsettings.Production.json for JWT settings.
+Publish.
+✅ Done!
+
+🎯 Final Project Structure:
+JwtAuthApi/
+  Controllers/
+    AuthController.cs
+  Models/
+    UserModel.cs
+  Services/
+    TokenService.cs
+  Program.cs
+  appsettings.json
+
+jwt-auth-app/
+  src/
+    app/
+      services/
+        auth.service.ts
+      guards/
+        auth.guard.ts
+      components/
+        login/
+        secure/
+      app-routing.module.ts
