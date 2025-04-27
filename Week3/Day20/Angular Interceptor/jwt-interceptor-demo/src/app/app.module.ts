@@ -1,8 +1,8 @@
 import { NgModule } from '@angular/core';
-import { BrowserModule, provideClientHydration, withEventReplay } from '@angular/platform-browser';
-
-import { AppRoutingModule } from './app-routing.module';
+import { BrowserModule } from '@angular/platform-browser';
+import { HttpClientModule, HTTP_INTERCEPTORS, provideHttpClient, withFetch } from '@angular/common/http';
 import { AppComponent } from './app.component';
+import { JwtInterceptor } from './jwt.interceptor'; // <- import the interceptor
 
 @NgModule({
   declarations: [
@@ -10,10 +10,15 @@ import { AppComponent } from './app.component';
   ],
   imports: [
     BrowserModule,
-    AppRoutingModule
+    HttpClientModule
   ],
   providers: [
-    provideClientHydration(withEventReplay())
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: JwtInterceptor,
+      multi: true
+    },
+    provideHttpClient(withFetch())
   ],
   bootstrap: [AppComponent]
 })
