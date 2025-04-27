@@ -13,6 +13,7 @@ cd JwtAuthApi
 Install NuGet Packages:
 
 dotnet add package Microsoft.AspNetCore.Authentication.JwtBearer
+dotnet add package Swashbuckle.AspNetCore
 
 Update appsettings.json
 {
@@ -137,6 +138,18 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<TokenService>();
 builder.Services.AddControllers();
 
+// 🛡 Add CORS service
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                   .AllowAnyMethod()
+                   .AllowAnyHeader();
+        });
+});
+
 // JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -158,10 +171,15 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-app.UseSwagger();
-app.UseSwaggerUI();
-
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 app.UseHttpsRedirection();
+
+// ✨ Enable CORS here
+app.UseCors("AllowAll");
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -173,7 +191,7 @@ app.Run();
 Part 2: Set up the Angular 19 App (with Bootstrap and Route Guards)
 
 2.1. Create Angular App
-ng new jwt-auth-app --routing --style=scss
+ng new jwt-auth-app --routing --style=scss --no-standalone
 cd jwt-auth-app
 
 ✅ Important: Choose "No" when it asks about standalone components!
@@ -201,7 +219,7 @@ import { Router } from '@angular/router';
   providedIn: 'root'
 })
 export class AuthService {
-  private baseUrl = 'https://localhost:5001/api/auth';
+  private baseUrl = 'https://localhost:7140/api/auth';
   
   constructor(private http: HttpClient, private router: Router) { }
 
@@ -215,7 +233,10 @@ export class AuthService {
   }
 
   isLoggedIn(): boolean {
-    return !!localStorage.getItem('token');
+    if (typeof window !== 'undefined') {  // ✅ Check if running in browser
+      return !!localStorage.getItem('token');
+    }
+    return false;
   }
 
   getToken() {
@@ -248,6 +269,67 @@ export class AuthGuard implements CanActivate {
   }
 }
 
+2.4.1 Command to create the jwt.interceptor.ts :
+ng generate interceptor interceptors/jwt
+
+// src/app/interceptors/jwt.interceptor.ts
+
+import { Injectable } from '@angular/core';
+import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent } from '@angular/common/http';
+import { Observable } from 'rxjs';
+
+@Injectable()
+export class JwtInterceptor implements HttpInterceptor {
+
+  intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    // Get token from local storage or any storage
+    const token = localStorage.getItem('token');
+
+    if (token) {
+      // Clone the request and attach the Authorization header
+      request = request.clone({
+        setHeaders: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+    }
+
+    return next.handle(request);
+  }
+}
+
+🛠️ 2.4.2 Register the Interceptor in your AppModule
+Open your app.module.ts, and add:
+
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { JwtInterceptor } from './interceptors/jwt.interceptor'; // ✅ path to interceptor
+
+@NgModule({
+  // ...
+  providers: [
+    { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true } // ✅ ADD THIS
+  ],
+})
+export class AppModule { }
+
+✅ Now, every outgoing HTTP request will automatically add the JWT token (if available)!
+
+📦 3. Store the JWT token after login
+Make sure, when user logs in successfully, you store the token like this:
+
+// Inside your login method after success (this is part of login component creation)
+localStorage.setItem('token', response.token);
+
+If you're using a service like AuthService, inside your login() method, once you get the token from backend, save it!
+
+📈 Full Flow Now
+Step	                         What happens
+User logs in	                 Save JWT token into localStorage
+User navigates anywhere	       Interceptor auto-attaches token on every API call
+API (backend) checks           Authorization header	✅ User authorized
+Angular displays secure data	🎯 Success
+
+
 2.5. Create Login Component
 ng generate component components/login
 
@@ -259,7 +341,8 @@ import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
-  templateUrl: './login.component.html'
+  templateUrl: './login.component.html',
+  standalone:false
 })
 export class LoginComponent {
   username = '';
@@ -302,21 +385,24 @@ ng generate component components/secure
 
 src/app/components/secure/secure.component.ts
 
+
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-secure',
-  templateUrl: './secure.component.html'
+  templateUrl: './secure.component.html',
+  standalone:false
 })
 export class SecureComponent implements OnInit {
   data = '';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private authService:AuthService) { }
 
   ngOnInit() {
     const token = localStorage.getItem('token');
-    this.http.get<any>('https://localhost:5001/api/auth/secure-data', {
+    this.http.get<any>('https://localhost:7140/api/auth/secure-data', {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -324,14 +410,25 @@ export class SecureComponent implements OnInit {
       this.data = res.data;
     });
   }
+
+  loout() {
+   
+    this.authService.logout();
+  }
 }
+
 
 src/app/components/secure/secure.component.html
 
 <div class="container mt-5">
-  <h2>Secure Page</h2>
-  <p>{{ data }}</p>
-</div>
+    <h2>Secure Page</h2>
+    <p>{{ data }}</p>
+  </div>
+
+  <div>
+    <button (click)="loout()" >LogOut</button>
+  </div>
+  
 
 2.7. Update Routing
 src/app/app-routing.module.ts
@@ -353,6 +450,41 @@ const routes: Routes = [
   exports: [RouterModule]
 })
 export class AppRoutingModule { }
+
+And update the AppModule as shown below:
+
+import { NgModule } from '@angular/core';
+import { BrowserModule, provideClientHydration, withEventReplay } from '@angular/platform-browser';
+
+import { AppRoutingModule } from './app-routing.module';
+import { AppComponent } from './app.component';
+import { LoginComponent } from './components/login/login.component';
+import { SecureComponent } from './components/secure/secure.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { HTTP_INTERCEPTORS, HttpClientModule, provideHttpClient, withFetch } from '@angular/common/http'; // ✅ IMPORT THIS
+import { JwtInterceptor } from './interceptors/jwt.interceptor'; // ✅ path to interceptor
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    LoginComponent,
+    SecureComponent
+  ],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    FormsModule,
+    ReactiveFormsModule,
+    HttpClientModule, // ✅ ADD THIS IN IMPORTS ARRAY
+  ],
+  providers: [
+    provideHttpClient(withFetch()), // ✅ Add this line to enable `fetch`
+    { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true } // ✅ ADD THIS
+  ],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+
 
 Part 3: Deploy Web API to Local IIS or Azure
 
