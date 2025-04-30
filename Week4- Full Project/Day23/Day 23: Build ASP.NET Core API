@@ -76,6 +76,21 @@ namespace PortfolioAPI.Models
 
 3. DbContext Update (Data/AppDbContext.cs)
 
+
+Install Required Packages
+
+In your ASP.NET Core backend:
+dotnet add package Microsoft.EntityFrameworkCore
+dotnet add package Microsoft.EntityFrameworkCore.Sqlite
+dotnet add package Microsoft.EntityFrameworkCore.Tools
+
+Configure SQLite in appsettings.json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Data Source=portfolio.db"
+  }
+}
+
 using Microsoft.EntityFrameworkCore;  
 using PortfolioAPI.Models;  
 
