@@ -53,6 +53,7 @@ namespace PortfolioAPI.Models
 {  
     public class ContactFormModel  
     {  
+        [Key]
         public int Id { get; set; }  
         public string Name { get; set; }    // Required  
         public string Email { get; set; }   // Required, valid email  
@@ -104,7 +105,12 @@ namespace PortfolioAPI.Data
 
         // Optional: Seed data or configure via Fluent API here  
     }  
-}  
+}
+
+Once it done , run the database migrations as like below :
+Add-Migration InitailMigration
+Update-database
+Now the portfolio.db will be created at your project root folder.
 
 4. Service Layer Interface (Services/IContactService.cs)
 
@@ -116,6 +122,7 @@ namespace PortfolioAPI.Services
     public interface IContactService  
     {  
         Task<ContactFormModel> SaveContactFormAsync(ContactFormDto contact);  
+        Task<ContactFormModel> GetContactInfoByID(int contactId);
     }  
 }  
 
@@ -138,6 +145,11 @@ namespace PortfolioAPI.Services
         {  
             _db = db;  
         }  
+
+        public async Task<ContactFormModel> GetContactInfoByID(int contactId)
+        {
+            return await _db.Contacts.FirstOrDefaultAsync(contact => contact.Id == contactId);
+        }
 
         public async Task<ContactFormModel> SaveContactFormAsync(ContactFormDto contact)  
         {  
@@ -169,56 +181,72 @@ namespace PortfolioAPI.Services
 
 6. API Controller (Controllers/ContactController.cs)
 
-using Microsoft.AspNetCore.Mvc;  
-using PortfolioAPI.Models;  
-using PortfolioAPI.Services;  
-using System;  
-using System.Threading.Tasks;  
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using PortfolioAPI.Models.DTO;
+using PortfolioAPI.Services;
 
-namespace PortfolioAPI.Controllers  
-{  
-    [ApiController]  
-    [Route("api/[controller]")]  
-    public class ContactController : ControllerBase  
-    {  
-        private readonly IContactService _contactService;  
+namespace PortfolioAPI.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class ContactController : ControllerBase
+    {
 
-        public ContactController(IContactService contactService)  
-        {  
-            _contactService = contactService;  
-        }  
+        private readonly IContactService _contactService;
 
-        [HttpPost]  
-        public async Task<IActionResult> PostContactForm([FromBody] ContactFormDto contactFormDto)  
-        {  
-            if (contactFormDto == null)  
-                return BadRequest("Contact form data is required.");  
+        public ContactController(IContactService contactService)
+        {
+            _contactService = contactService;
+        }
 
-            try  
-            {  
-                var saved = await _contactService.SaveContactFormAsync(contactFormDto);  
+        [HttpPost]
+        public async Task<IActionResult> PostContactForm([FromBody] ContactFormDto contactFormDto)
+        {
+            if (contactFormDto == null)
+                return BadRequest("Contact form data is required.");
+
+            try
+            {
+                var saved = await _contactService.SaveContactFormAsync(contactFormDto);
                 // Return Created status with saved entity ID and info  
-                return CreatedAtAction(nameof(GetContactById), new { id = saved.Id }, saved);  
-            }  
-            catch (ArgumentException ex)  
-            {  
-                return BadRequest(new { error = ex.Message });  
-            }  
-            catch(Exception)  
-            {  
-                return StatusCode(500, "Internal server error");  
-            }  
-        }  
+                return CreatedAtAction(nameof(GetContactById), new { id = saved.Id }, saved);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Internal server error");
+            }
+        }
 
         // Optional: Retrieve contact form entry by ID  
-        [HttpGet("{id}")]  
-        public async Task<IActionResult> GetContactById(int id)  
-        {  
-            // You can add a method in IContactService to support this  
-            return NotFound(); // Implement later  
-        }  
-    }  
-}  
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetContactById(int contactId)
+        {
+            if (contactId == 0)
+                return BadRequest("Invalid Contact Id.");
+
+            try
+            {
+                var contact = await _contactService.GetContactInfoByID(contactId);
+
+                if (contact == null)
+                    return NotFound("Contact not found.");
+
+                return Ok(contact);
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500, "Internal server error ex:"+ ex.Message);
+            }
+
+        }
+    }
+}
+
 
 7. Dependency Injection Registration (Program.cs)
 Modify your Program.cs to register the service:
