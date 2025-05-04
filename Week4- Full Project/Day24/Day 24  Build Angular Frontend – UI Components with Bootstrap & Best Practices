@@ -1,0 +1,189 @@
+Day 24: Build Angular Frontend – UI Components with Bootstrap & Best Practices
+
+1. Initial Setup & CLI Commands
+
+1.1. Create Angular project:
+
+Note :if you are not having the exsitng angular app then create the new one:
+ng new portfolio-website  
+cd portfolio-website  
+
+1.2. Install Bootstrap and dependencies:
+npm install bootstrap  
+
+1.3. Include Bootstrap in styles:
+
+In angular.json, add:
+
+json
+"styles": [  
+  "src/styles.scss",  
+  "node_modules/bootstrap/dist/css/bootstrap.min.css"  
+]  
+
+Alternative: import Bootstrap in styles.scss:
+
+@import "~bootstrap/scss/bootstrap";  
+
+
+2. Create Reusable UI Components
+
+Use Angular CLI to generate core UI components:
+
+ng generate component shared/header  
+ng generate component shared/footer  
+ng generate component shared/card  
+ng generate component pages/home  
+ng generate component pages/about  
+ng generate component pages/projects  
+ng generate component pages/contact  
+
+Organize components:
+
+Header & Footer: Navigation UI, social links, footer info.
+Card: To display projects/skills.
+Pages: Individual pages for content.
+
+3. Component Samples & Styling with Bootstrap
+Example: header.component.html
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">  
+  <div class="container">  
+    <a class="navbar-brand" href="#">MyPortfolio</a>  
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">  
+      <span class="navbar-toggler-icon"></span>  
+    </button>  
+    <div class="collapse navbar-collapse" id="navbarNav">  
+      <ul class="navbar-nav ms-auto">  
+        <li class="nav-item"><a class="nav-link" routerLink="/">Home</a></li>  
+        <li class="nav-item"><a class="nav-link" routerLink="/about">About</a></li>  
+        <li class="nav-item"><a class="nav-link" routerLink="/projects">Projects</a></li>  
+        <li class="nav-item"><a class="nav-link" routerLink="/contact">Contact</a></li>  
+      </ul>  
+    </div>  
+  </div>  
+</nav>  
+
+Example: footer.component.html
+<footer class="bg-dark text-white py-4 mt-auto">  
+  <div class="container text-center">  
+    <p>&copy; 2025 MyPortfolio. All rights reserved.</p>  
+    <div>  
+      <!-- Social Icons -->  
+      <a href="#" class="text-white me-3"><i class="bi bi-github"></i></a>  
+      <a href="#" class="text-white me-3"><i class="bi bi-linkedin"></i></a>  
+    </div>  
+  </div>  
+</footer>  
+
+Include Bootstrap Icons:
+npm install bootstrap-icons  
+
+And import in angular.json:
+
+json
+"styles": [  
+  "node_modules/bootstrap-icons/font/bootstrap-icons.css"  
+]  
+
+Example: card.component.html (for projects)
+<div class="card h-100 shadow-sm">  
+  <img [src]="project.image" class="card-img-top" [alt]="project.title" />  
+  <div class="card-body d-flex flex-column">  
+    <h5 class="card-title">{{ project.title }}</h5>  
+    <p class="card-text">{{ project.description }}</p>  
+    <a [href]="project.link" target="_blank" class="mt-auto btn btn-outline-primary">View Project</a>  
+  </div>  
+</div>  
+Note: Use @Input() in card.component.ts to pass project data.
+
+4. Designing Pages with Bootstrap
+Home Page (home.component.html)
+<div class="container my-5 text-center">  
+  <h1 class="display-4 mb-4">Welcome to My Portfolio</h1>  
+  <p class="lead">Showcasing my Projects, Skills, and Experience</p>  
+  <a routerLink="/about" class="btn btn-primary btn-lg m-2">About Me</a>  
+  <a routerLink="/projects" class="btn btn-outline-primary btn-lg m-2">My Projects</a>  
+</div>  
+
+About Page (about.component.html)
+<div class="container my-5">  
+  <h2>About Me</h2>  
+  <p>[Personal info, skills, experience...]</p>  
+</div>  
+
+Projects Page (projects.component.html)
+
+<div class="container my-5">  
+  <h2 class="mb-4">My Projects</h2>  
+  <div class="row gy-4">  
+    <div class="col-md-4" *ngFor="let project of projects">  
+      <app-card [project]="project"></app-card>  
+    </div>  
+  </div>  
+</div>  
+
+Contact Page (contact.component.html)
+<div class="container my-5">  
+  <h2>Contact Me</h2>  
+  <form (ngSubmit)="onSubmit()" #contactForm="ngForm" class="row g-3">  
+    <div class="col-md-6">  
+      <label for="name" class="form-label">Name</label>  
+      <input type="text" id="name" class="form-control" required [(ngModel)]="contact.name" name="name" />  
+    </div>  
+    <div class="col-md-6">  
+      <label for="email" class="form-label">Email</label>  
+      <input type="email" id="email" class="form-control" required [(ngModel)]="contact.email" name="email" />  
+    </div>  
+    <div class="col-12">  
+      <label for="message" class="form-label">Message</label>  
+      <textarea id="message" rows="5" class="form-control" required [(ngModel)]="contact.message" name="message"></textarea>  
+    </div>  
+    <div class="col-12">  
+      <button type="submit" class="btn btn-primary">Send</button>  
+    </div>  
+  </form>  
+</div>  
+
+5. Best Practices & Tips
+Component Reusability: Build generic components (Card, Button, Modal) to reuse across pages.
+
+Routing: Use lazy loading for feature modules for faster load times.
+ng generate module modules/about --route about --module app.module  
+
+Responsive Design: Test on various screen sizes; use Bootstrap grid system (col, row, container, container-fluid).
+Consistent Styling: Define theme variables in scss files for easy theme adjustments.
+Accessibility: Use semantic HTML, aria labels, and ensure keyboard navigability.
+Performance: Use Ahead-Of-Time (AOT) compilation, Lazy Loading, and minify CSS/JS for production.
+Services: Keep HTTP logic in dedicated services; avoid direct HTTP calls in components.
+State Management: Use RxJS observables and BehaviorSubjects for dynamic data updates.
+
+6. Sample CLI Commands Summary
+# Create project  
+ng new portfolio-website  
+cd portfolio-website  
+
+# Add Bootstrap and Bootstrap Icons  
+npm install bootstrap bootstrap-icons  
+
+# Generate shared components  
+ng generate component shared/header  
+ng generate component shared/footer  
+ng generate component shared/card  
+
+# Generate feature pages  
+ng generate component pages/home  
+ng generate component pages/about  
+ng generate component pages/projects  
+ng generate component pages/contact  
+
+# Generate feature modules with lazy loading  
+ng generate module modules/about --route about --module app.module  
+
+# Serve the app locally  
+ng serve  
+
+7. Final Tips
+Keep your code clean, comment where necessary.
+Use Angular best practices—services for APIs, avoid logic in templates.
+Make frequent commits to version control.
+Test responsiveness across devices early.
