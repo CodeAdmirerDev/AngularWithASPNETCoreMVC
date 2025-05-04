@@ -235,7 +235,7 @@ Day 24: Build Angular Frontend
 
 UI components
 
-Angular Material (optional)
+Use bootstrap for UI styling 
 
 
 Day 25: Connect Angular & API
