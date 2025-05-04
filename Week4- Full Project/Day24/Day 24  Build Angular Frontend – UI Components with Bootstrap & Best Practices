@@ -96,6 +96,30 @@ Example: card.component.html (for projects)
 </div>  
 Note: Use @Input() in card.component.ts to pass project data.
 
+CardComponent (shared/card.component.ts)
+Here, CardComponent will accept a project object via @Input().
+
+import { Component, Input } from '@angular/core';  
+
+export interface Project {  
+  title: string;  
+  description: string;  
+  image: string;  
+  link: string;  
+}  
+
+@Component({  
+  selector: 'app-card',  
+  templateUrl: './card.component.html',  
+  styleUrls: ['./card.component.scss']   ,
+  standalone:false 
+})  
+export class CardComponent {  
+  @Input() project!: Project;  
+}  
+In your card.component.html, use bindings like project.title, etc.
+
+
 4. Designing Pages with Bootstrap
 Home Page (home.component.html)
 <div class="container my-5 text-center">  
@@ -122,6 +146,40 @@ Projects Page (projects.component.html)
   </div>  
 </div>  
 
+ ProjectsComponent (pages/projects/projects.component.ts
+
+import { Component } from '@angular/core';  
+
+interface Project {  
+  title: string;  
+  description: string;  
+  image: string;  
+  link: string;  
+}  
+
+@Component({  
+  selector: 'app-projects',  
+  templateUrl: './projects.component.html'   ,
+  standalone:false 
+})  
+export class ProjectsComponent {  
+  projects: Project[] = [  
+    {  
+      title: 'Project One',  
+      description: 'Description for project one.',  
+      image: 'assets/img/project1.png',  
+      link: 'https://example.com/project1'  
+    },  
+    {  
+      title: 'Project Two',  
+      description: 'Description for project two.',  
+      image: 'assets/img/project2.png',  
+      link: 'https://example.com/project2'  
+    },  
+    // Add more projects as needed  
+  ];  
+}
+
 Contact Page (contact.component.html)
 <div class="container my-5">  
   <h2>Contact Me</h2>  
@@ -143,6 +201,72 @@ Contact Page (contact.component.html)
     </div>  
   </form>  
 </div>  
+
+ ContactComponent (pages/contact/contact.component.ts)
+
+import { Component }  from '@angular/core';  
+
+interface Contact {  
+  name: string;  
+  email: string;  
+  message: string;  
+}  
+
+@Component({  
+  selector: 'app-contact',  
+  templateUrl: './contact.component.html'  ,
+  standalone:false 
+})  
+export class ContactComponent {  
+  contact: Contact = { name: '', email: '', message: '' };  
+
+  onSubmit() {  
+    // Handle form submission logic, e.g., send email via service  
+    console.log('Contact info:', this.contact);  
+    // Reset form  
+    this.contact = { name: '', email: '', message: '' };  
+  }  
+}
+
+And also update the AppModule.ts files :
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+
+import { AppRoutingModule } from './app-routing.module';
+import { AppComponent } from './app.component';
+import { HeaderComponent } from './shared/header/header.component';
+import { FooterComponent } from './shared/footer/footer.component';
+import { CardComponent } from './shared/card/card.component';
+import { HomeComponent } from './pages/home/home.component';
+import { AboutComponent } from './pages/about/about.component';
+import { ProjectsComponent } from './pages/projects/projects.component';
+import { ContactComponent } from './pages/contact/contact.component';
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    HeaderComponent,
+    FooterComponent,
+    CardComponent,
+    HomeComponent,
+    AboutComponent,
+    ProjectsComponent,
+    ContactComponent
+  ],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+
 
 5. Best Practices & Tips
 Component Reusability: Build generic components (Card, Button, Modal) to reuse across pages.
