@@ -160,6 +160,22 @@ Add/Remove dynamic child component and track destruction
 
 🔹 Interview tips & common questions
 
+Day15.1 : NgRx Intro
+
+🔹 NgRx Introduction:
+
+What is Redux?
+State, Actions, Reducers, Selectors, Effects
+Install and set up NgRx
+
+Day15.2 
+Day 16: Implement NgRx in Article Feature
+Create feature store for Article component
+Actions, Reducers, Selectors
+Use HttpClient with Effects
+Bind store data to UI
+🔹 Practice: CRUD using NgRx in ArticleComponent
+
 
 Day 16: Angular Directives
 
