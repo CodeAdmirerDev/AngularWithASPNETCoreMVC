@@ -1,3 +1,5 @@
 <div>
-    <h3> Counter value : {{counter}}</h3>
+    <h3> Counter value with async pipe : {{(counter$! | async)?.counter}}</h3>
+    
+    <h3> Counter value with subscrition type : {{counter}}</h3>
 </div>
